@@ -25,9 +25,9 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
       "class": "MaxThermostatDevice", 
       "name": "Bathroom Radiator left",
       "deviceNo": "12345cf",
-  		"comfyTemp": 23.0,
-		"ecoTemp": 17.5,
-		"vacTemp": 16.5,
-		"actTemp": 21.0,
-		"mode": "auto"
+      "comfyTemp": 23.0,
+      "ecoTemp": 17.5,
+      "vacTemp": 16.5,
+      "actTemp": 21.0,
+      "mode": "auto"
     }
