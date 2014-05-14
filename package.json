@@ -1,0 +1,27 @@
+{ "name": "pimatic-max-thermostat",
+  "description": "Plugin to control the MAX! Thermostats.",
+  "author": "Georg Peters <georg.online@posteo.de> (https://github.com/pimatic/)",
+  "main": "maxthermostat.coffee",
+  "files": [
+    "doc",
+    "maxthermostat.coffee",
+    "README.md",
+    "maxthermostat-config-schema.coffee",
+    "device-config-schema.coffee"
+  ],
+  "version": "0.0.1",
+  "homepage": "http://github.com/pimatic/pimatic",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/georg90/pimatic-max-thermostat.git"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "pimatic": "0.7.*"
+  },
+  "engines": {
+    "node": ">0.8.x",
+    "npm": ">1.1.x"
+  }
+}
