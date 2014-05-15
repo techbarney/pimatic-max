@@ -3,6 +3,10 @@
 # Defines a `node-convict` config-schema and exports it.
 
 module.exports =
+  roomID:
+    doc: "The RoomID - find out with read.php"
+    format: "int"
+    default: 1
   deviceNo:
     doc: "The Device RF No - find out with read.php"
     format: "String"

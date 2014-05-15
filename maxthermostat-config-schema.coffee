@@ -11,7 +11,7 @@ module.exports =
     doc: "The port of the MAX! Cube (Default: 62910)"
     format: "int"
     default: 62910
-  cmdPath:
-    doc: "The path to the send.php is located (without backslash!)"
+  binary:
+    doc: "The path to the max.php is located (without backslash!)"
     format: "String"
-    default: "some/path/send.php"
+    default: "./max.php"

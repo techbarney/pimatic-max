@@ -8,15 +8,15 @@ Configuration
 You can load the plugin by editing your `config.json` to include:
 
     { 
-       "plugin": "max-thermostat",
+       "plugin": "MaxThermostat",
        "host": "192.168.X.X",
        "port": 62910,
-       "cmdPath": "/path/to/send.php"
+       "cmdPath": "./max.php"
     }
 
 in the `plugins` section.
 
-Use the "read.php" to get your RoomID and DeviceID (identify by the name)
+Use the "scan.php" to get your RoomID and DeviceID (use scan.php?host=CubeIP&port=62910)
 Thermostats can be defined by adding them to the `devices` section in the config file.
 Set the `class` attribute to `MaxThermostatDevice`. For example:
 
@@ -24,6 +24,7 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
       "id": "bathroomLeft",
       "class": "MaxThermostatDevice", 
       "name": "Bathroom Radiator left",
+      "RoomID": 1,
       "deviceNo": "12345cf",
       "comfyTemp": 23.0,
       "ecoTemp": 17.5,
