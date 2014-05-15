@@ -1,4 +1,10 @@
 module.exports = (env) ->
+  convict = env.require "convict"
+  Q = env.require 'q'
+  assert = env.require 'cassert'
+  _ = env.require 'lodash'
+
+  exec = Q.denodeify(require("child_process").exec)
  
   class MaxThermostat extends env.plugins.Plugin
  
@@ -29,7 +35,7 @@ module.exports = (env) ->
   class MaxThermostatDevice extends env.devices.Device
  
 
-  constructor: (config) ->
+    constructor: (config) ->
       conf = convict _.cloneDeep(require("./device-config-schema"))
       conf.load config
       conf.validate()
@@ -39,25 +45,25 @@ module.exports = (env) ->
       @id = config.id
       super()
 
-  # define the available actions for the template 
-  modeAuto: -> @changeModeTo auto
-  modeManu: -> @changeModeTo manu
-  modeBoost: -> @changeModeTo boost
-  modeEco: -> @changeTermperatureTo @config.ecoTemp
-  modeComfy: -> @changeTermperatureTo @config.comfyTemp
-  modeVac: -> @changeTermperatureTo @config.vacTemp
-  tempPlus: -> @changeTermperatureTo @config.actTemp+0,5
-  tempMinus: -> @changeTermperatureTo @config.actTemp-0,5
-  setTemp: -> @changeTermperatureTo @temperature
+    # define the available actions for the template 
+    modeAuto: -> @changeModeTo auto
+    modeManu: -> @changeModeTo manu
+    modeBoost: -> @changeModeTo boost
+    modeEco: -> @changeTermperatureTo @config.ecoTemp
+    modeComfy: -> @changeTermperatureTo @config.comfyTemp
+    modeVac: -> @changeTermperatureTo @config.vacTemp
+    tempPlus: -> @changeTermperatureTo @config.actTemp+0,5
+    tempMinus: -> @changeTermperatureTo @config.actTemp-0,5
+    setTemp: -> @changeTermperatureTo @temperature
 
 
-  getState: () ->
+    getState: () ->
       if @_state? then return Q @_state
       # Built the command to get the thermostat status
-      command = "php #{plugin.config.binary}?" # define the binary
-      command += "host=#{plugin.config.host}&port=#{plugin.config.port}" # select the host and port of the cube
-      command += "&RoomID=#{@config.RoomID}&deviceNo=#{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "&type=status" # get status of the thermostat
+      command = "php #{plugin.config.binary}" # define the binary
+      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += "status" # get status of the thermostat
       # and execue it. TODO: Still need to parse the JSON data!!
       return exec(command).then( (streams) =>
         stdout = streams[0]
@@ -78,10 +84,10 @@ module.exports = (env) ->
   changeModeTo: (mode) ->
       if @mode is mode then return
       # Built the command
-      command = "php #{plugin.config.binary}?" # define the binary
-      command += "host=#{plugin.config.host}&port=#{plugin.config.port}" # select the host and port of the cube
-      command += "&RoomID=#{@config.RoomID}&deviceNo=#{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "&mode=#{@mode}" # set mode of the thermostat
+      command = "php #{plugin.config.binary}" # define the binary
+      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += "mode #{@mode}" # set mode of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
@@ -92,10 +98,10 @@ module.exports = (env) ->
   changeTermperatureTo: (temperature) ->
       if @temperature is temperature then return
       # Built the command
-      command = "php #{plugin.config.binary}?" # define the binary
-      command += "host=#{plugin.config.host}&port=#{plugin.config.port}" # select the host and port of the cube
-      command += "&RoomID=#{@config.RoomID}&deviceNo=#{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "&temp=#{@temperature}" # set temperature of the thermostat
+      command = "php #{plugin.config.binary}" # define the binary
+      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += "temp #{@temperature}" # set temperature of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]

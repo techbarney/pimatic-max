@@ -1,13 +1,19 @@
 <?php
-
+error_reporting(E_ALL ^ E_NOTICE);
 // use static values for testing... TODO: Remove once everything is working
 $host = "192.168.0.59"; // Your Cube-IP or hostame Here!
 $port = "62910"; // Cube Port
 $RoomID = "1"; // RoomID (check with scan.php)
 $DeviceRF = "085e4c"; // DeviceRF (check with scan.php)
-$temp = $_GET["temp"];
-$mode = $_GET["mode"];
-$type = $_GET["type"];
+//$temp = $_GET["temp"];
+//$mode = $_GET["mode"];
+//$type = $_GET["type"];
+$host = $argv[1];
+$port = $argv[2];
+$RoomID = $argv[3];
+$DeviceRF = $argv[4];
+$type = $argv[5];
+$cmd = $argv[6];
 //$RoomID = $_GET["RoomID"]; 
 //$DeviceNo = $_GET["deviceNo"];
 //$host = $_GET["host"];
@@ -42,15 +48,26 @@ $deviceconf = unserialize(file_get_contents('data/'.$host.'_dev.txt'));
 
 
 // Check the Status of the thermostat defined. Returned in json format
-if($type == "status") { 
-	
+switch($type) {
+  case ("status"):
 	$status = array('actTemp' => $deviceconf[$DeviceRF]["Temperature"], 'mode' => $deviceconf[$DeviceRF]["Mode"], 'comfyTemp' => $deviceconf[$DeviceRF]["ComfortTemperature"], 'ecoTemp' => $deviceconf[$DeviceRF]["EcoTemperature"]);
-
    echo json_encode($status);
+   exit();
+   break;
+  
+  case ("mode"):
+   $mode = $cmd;
+   break;
+
+  case ("temp"):
+   $temp = $cmd;
+   break;
+
+  default:
+  echo "No case...";
+  break;
 	
 }
-
-else {
 
 $fp = @fsockopen($host, $port, $errno, $errstr, 5);
 $finished = 0;
@@ -94,7 +111,7 @@ while (!feof($fp) && time() < $jetzt+20 && $finished == 0)
   if ($line != "")  $buff .= $line."\n";
 
 }
-$return = '<hr /><pre>'.print_r($buff,true).'</pre>';
+//$return = '<hr /><pre>'.print_r($buff,true).'</pre>';
 
 
 fclose($fp);
@@ -102,5 +119,5 @@ fclose($fp);
 //echo $temp." temp<br>";
 //echo $mode." mode<br>";
 //echo $deg." deg<br>";
-}
+
 ?>
