@@ -47,7 +47,7 @@ $deviceconf = unserialize(file_get_contents('data/'.$host.'_dev.txt'));
 }
 
 
-// Check the Status of the thermostat defined. Returned in json format
+// Check the Status of the thermostat defined. And see if temp or mode should be changed. Returned in json format
 switch($type) {
   case ("status"):
 	$status = array('actTemp' => $deviceconf[$DeviceRF]["Temperature"], 'mode' => $deviceconf[$DeviceRF]["Mode"], 'comfyTemp' => $deviceconf[$DeviceRF]["ComfortTemperature"], 'ecoTemp' => $deviceconf[$DeviceRF]["EcoTemperature"]);

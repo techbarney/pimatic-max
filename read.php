@@ -1,5 +1,4 @@
 <?php
-echo "<pre>";
 
 // Uncomment the follwing 2 lines
 // $host = "192.168.2.32"; // Your Cube-IP or hostame Here!
@@ -260,6 +259,4 @@ echo "\n";
 ob_end_clean();
 }
 }
-
-echo "</pre>";
 ?>

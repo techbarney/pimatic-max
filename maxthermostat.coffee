@@ -69,19 +69,16 @@ module.exports = (env) ->
         stdout = streams[0]
         stderr = streams[1]
         stdout = stdout.trim()
-        switch stdout
-          when "1"
-            @_state = on
-            return Q @_state
-          when "0"
-            @_state = off
-            return Q @_state
-          else 
-            env.logger.debug stderr
-            throw new Error "MaxThermostat: unknown state=\"#{stdout}\"!"
-        )
+        for (var i=0; i<stdout.length; i++)
+          for (var name in stdout[i]) {
+        config.actTemp = stdout[i][actTemp];
+        config.mode = stdout[i][mode];
+        config.comfyTemp = stdout[i][comfyTemp];
+        config.ecoTemp = stdout[i][ecoTemp];
+        }
+        # Build error handling here..
 
-  changeModeTo: (mode) ->
+    changeModeTo: (mode) ->
       if @mode is mode then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
@@ -95,7 +92,7 @@ module.exports = (env) ->
         env.logger.debug stderr if stderr.length isnt 0
         @_setMode(mode)
 
-  changeTermperatureTo: (temperature) ->
+    changeTermperatureTo: (temperature) ->
       if @temperature is temperature then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
