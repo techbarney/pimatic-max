@@ -11,7 +11,7 @@ You can load the plugin by editing your `config.json` to include:
        "plugin": "MaxThermostat",
        "host": "192.168.X.X",
        "port": 62910,
-       "cmdPath": "./max.php"
+       "binary": "./max.php"
     }
 
 in the `plugins` section.

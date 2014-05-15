@@ -39,6 +39,18 @@ module.exports = (env) ->
       @id = config.id
       super()
 
+  # define the available actions for the template 
+  modeAuto: -> @changeModeTo auto
+  modeManu: -> @changeModeTo manu
+  modeBoost: -> @changeModeTo boost
+  modeEco: -> @changeTermperatureTo @config.ecoTemp
+  modeComfy: -> @changeTermperatureTo @config.comfyTemp
+  modeVac: -> @changeTermperatureTo @config.vacTemp
+  tempPlus: -> @changeTermperatureTo @config.actTemp+0,5
+  tempMinus: -> @changeTermperatureTo @config.actTemp-0,5
+  setTemp: -> @changeTermperatureTo @temperature
+
+
   getState: () ->
       if @_state? then return Q @_state
       # Built the command to get the thermostat status
