@@ -15,6 +15,18 @@ module.exports = (env) ->
       @config = conf.get ""
       @checkBinary()
 
+      # wait till all plugins are loaded
+      @framework.on "after init", =>
+        # Check if the mobile-frontent was loaded and get a instance
+        mobileFrontend = @framework.getPlugin 'mobile-frontend'
+        if mobileFrontend?
+          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
+          # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
+          mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/html.jade"
+      else
+          env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
+
+
 
     checkBinary: ->
       exec("#{@config.binary} -v").catch( (error) ->
@@ -106,6 +118,6 @@ module.exports = (env) ->
         env.logger.debug stderr if stderr.length isnt 0
         @_setMode(mode)
       )
- 
+    getTemplateName: -> "MaxThermostatDevice"
 
   return MaxThermostat
