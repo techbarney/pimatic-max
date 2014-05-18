@@ -22,8 +22,13 @@ module.exports = (env) ->
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
           # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
+<<<<<<< HEAD
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
         else
+=======
+          mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/html.jade"
+      else
+>>>>>>> a145baa3dbcf8dc6d62d4916d1e4fb0f89b1f264
           env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
 
 
@@ -98,6 +103,7 @@ module.exports = (env) ->
           @_setMode(mode)
          )
 
+<<<<<<< HEAD
       changeTermperatureTo: (temperature) ->
         if @temperature is temperature then return
         # Built the command
@@ -113,5 +119,22 @@ module.exports = (env) ->
           @_setMode(mode)
         )
       getTemplateName: -> "MaxThermostatDevice"
+=======
+    changeTermperatureTo: (temperature) ->
+      if @temperature is temperature then return
+      # Built the command
+      command = "php #{plugin.config.binary}" # define the binary
+      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += "temp #{@temperature}" # set temperature of the thermostat
+      # and execue it.
+      return exec(command).then( (streams) =>
+        stdout = streams[0]
+        stderr = streams[1]
+        env.logger.debug stderr if stderr.length isnt 0
+        @_setMode(mode)
+      )
+    getTemplateName: -> "MaxThermostatDevice"
+>>>>>>> a145baa3dbcf8dc6d62d4916d1e4fb0f89b1f264
 
   return plugin

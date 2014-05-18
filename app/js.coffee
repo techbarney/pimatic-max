@@ -12,6 +12,7 @@ $(document).on( "pagebeforecreate", (event) ->
     afterRender: (elements) -> 
       super(elements)
       # Do something after the html-element was added
+<<<<<<< HEAD
 
     # define the available actions for the template
     modeAuto: -> @changeModeTo auto
@@ -23,6 +24,10 @@ $(document).on( "pagebeforecreate", (event) ->
     tempPlus: -> @changeTermperatureTo @config.actTemp+0,5
     tempMinus: -> @changeTermperatureTo @config.actTemp-0,5
     setTemp: -> @changeTermperatureTo @temperature
+=======
+    tempPlus: ->
+      # Do Stuff
+>>>>>>> a145baa3dbcf8dc6d62d4916d1e4fb0f89b1f264
       
   # register the item-class
   pimatic.templateClasses['MaxThermostatDevice'] = MaxThermostatDeviceItem
