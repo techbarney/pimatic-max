@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(0);
 // use static values for testing... TODO: Remove once everything is working
 $host = "192.168.0.59"; // Your Cube-IP or hostame Here!
 $port = "62910"; // Cube Port
@@ -30,6 +30,7 @@ function hex_to_base64($hex){
   return base64_encode($return);
 }  
 
+
 //get data from the cube
 if ($data && $deviceconf)
 {
@@ -46,12 +47,16 @@ $data = unserialize(file_get_contents('data/'.$host.'.txt'));
 $deviceconf = unserialize(file_get_contents('data/'.$host.'_dev.txt'));
 }
 
-
 // Check the Status of the thermostat defined. And see if temp or mode should be changed. Returned in json format
 switch($type) {
   case ("status"):
 	$status = array('actTemp' => $deviceconf[$DeviceRF]["Temperature"], 'mode' => $deviceconf[$DeviceRF]["Mode"], 'comfyTemp' => $deviceconf[$DeviceRF]["ComfortTemperature"], 'ecoTemp' => $deviceconf[$DeviceRF]["EcoTemperature"]);
    echo json_encode($status);
+   exit();
+   break;
+
+  case ("check"):
+   echo "found";
    exit();
    break;
   

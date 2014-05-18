@@ -5,7 +5,7 @@
 module.exports =
   host:
     doc: "The IP of the MAX! Cube"
-    format: "String"
+    format: String
     default: "127.0.0.1"
   port:
     doc: "The port of the MAX! Cube (Default: 62910)"
@@ -13,5 +13,5 @@ module.exports =
     default: 62910
   binary:
     doc: "The path to the max.php is located (without backslash!)"
-    format: "String"
+    format: String
     default: "./max.php"

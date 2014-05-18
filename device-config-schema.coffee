@@ -9,7 +9,7 @@ module.exports =
     default: 1
   deviceNo:
     doc: "The Device RF No - find out with read.php"
-    format: "String"
+    format: String
     default: ""
   comfyTemp:
     doc: "The defined comfy temperature"
@@ -29,5 +29,5 @@ module.exports =
     default: 21.0
   mode: 
     doc: "The mode of the thermostat (auto/manual/boost)"
-    format: "String"
+    format: String
     default: "auto"
