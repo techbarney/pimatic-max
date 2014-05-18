@@ -86,6 +86,12 @@ module.exports = (env) ->
     getMode: () -> Q(@_mode)
     getSettemperature: () -> Q(@_settemperature)
 
+    _setMode: (mode) ->
+      if mode is @_mode then return
+      @_mode = mode
+      @emit "mode", @_mode
+
+
     getState: () ->
       if @_state? then return Q @_state
       # Built the command to get the thermostat status
@@ -103,8 +109,7 @@ module.exports = (env) ->
         config.mode = data.mode
         config.comfyTemp = data.comfyTemp
         config.ecoTemp = data.ecoTemp
-        @_mode = data.mode
-        @emit "mode", @_mode
+        @_setMode(data.mode)
       )
 
 

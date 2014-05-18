@@ -11,12 +11,18 @@ $(document).on( "templateinit", (event) ->
       super(data)
 
       modeAttr = @getAttribute('mode')
-      console.log modeAttr
+      # todo: do something with mode: maybe highlight the button
 
+      # settemperature changes -> update input
       stAttr = @getAttribute('settemperature')
-      console.log stAttr
       stAttr.value.subscribe( (value) =>
         @inputValue(value)
+      )
+
+      # input changes -> call changeTemperatue
+      @inputValue.subscribe( (textValue) =>
+        if parseFloat(stAttr.value()) isnt parseFloat(textValue)
+          @changeTermperatureTo(parseFloat(textValue))
       )
 
       # Do something, after create: console.log(this)
@@ -36,10 +42,16 @@ $(document).on( "templateinit", (event) ->
     setTemp: -> @changeTermperatureTo @temperature
 
     changeModeTo: (mode) ->
-      $.get("/api/device/#{@deviceId}/changeModeTo/#{mode}").fail(ajaxAlertFail)
+      $.ajax(
+        url: "/api/device/#{@deviceId}/changeModeTo"
+        data: {mode}
+      ).fail(ajaxAlertFail)
 
-    changeTermperatureTo: (temp) ->
-      $.get("/api/device/#{@deviceId}/changeTermperatureTo/#{temp}").fail(ajaxAlertFail)
+    changeTermperatureTo: (settemperature) ->
+      $.ajax(
+        url:"/api/device/#{@deviceId}/changeTermperatureTo"        
+        data: {settemperature}
+      ).fail(ajaxAlertFail)
       
   # register the item-class
   pimatic.templateClasses['MaxThermostatDevice'] = MaxThermostatDeviceItem
