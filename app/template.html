@@ -1,6 +1,16 @@
-<script id="MaxThermostatDevice-template" type="text/template">.
-  <li class="sortable device no-header">
+<script id="MaxThermostatDevice-template" type="text/template">
+  <li class="sortable device no-header maxthermodevice">
     <label data-bind="text: name" class="device-label"></label>
-    <a data-bind="click: modeAuto" class="ui-btn ui-mini ui-btn-inline ui-corner-all">modeAuto</a>
+    <div class="controls">
+      <div data-role="controlgroup" data-type="horizontal" data-mini="true" class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
+        <div class="ui-controlgroup-controls ">
+          <a class="ui-btn ui-corner-all" data-bind="click: modeAuto">Auto</a>
+          <a class="ui-btn ui-corner-all" data-bind="click: modeManu">Manu</a>
+          <a class="ui-btn ui-corner-all" data-bind="click: modeBoost">Boost</a>
+          <input data-bind="value: inputValue" type="number" data-clear-btn="false" name="number-1" id="number-1" value="">
+        </div>
+      </div>
+    </div>
   </li>
 </script>
+
