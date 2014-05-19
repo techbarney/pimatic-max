@@ -65,7 +65,7 @@ module.exports = (env) ->
         params: 
           mode: 
             type: String
-      changeTermperatureTo:
+      changeTemperatureTo:
         params: 
           settemperature: 
             type: Number
