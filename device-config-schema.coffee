@@ -14,19 +14,19 @@ module.exports =
   comfyTemp:
     doc: "The defined comfy temperature"
     format: "int"
-    default: 21.0
+    default: 21
   ecoTemp:
     doc: "The defined eco mode temperature"
     format: "int"
-    default: 16.5
+    default: 17
   vacTemp:
     doc: "The defined vacation mode temperature"
     format: "int"
-    default: 14.5
+    default: 14
   actTemp: 
     doc: "The actual temperatur"
     format: "int"
-    default: 21.0
+    default: 21
   mode: 
     doc: "The mode of the thermostat (auto/manual/boost)"
     format: String

@@ -1,36 +1,21 @@
 <?php
 error_reporting(0);
 // use static values for testing... TODO: Remove once everything is working
-$host = "192.168.0.59"; // Your Cube-IP or hostame Here!
-$port = "62910"; // Cube Port
-$RoomID = "1"; // RoomID (check with scan.php)
-$DeviceRF = "085e4c"; // DeviceRF (check with scan.php)
+//$host = "192.168.0.59"; // Your Cube-IP or hostame Here!
+//$port = "62910"; // Cube Port
+//$RoomID = "1"; // RoomID (check with scan.php)
+//$DeviceRF = "085e4c"; // DeviceRF (check with scan.php)
 //$temp = $_GET["temp"];
 //$mode = $_GET["mode"];
-//$type = $_GET["type"];
+//$type = $RoomID = $argv[3];
 $host = $argv[1];
 $port = $argv[2];
+include('read.php'); // include the variables
 $RoomID = $argv[3];
 $DeviceRF = $argv[4];
 $type = $argv[5];
-$cmd = $argv[6];
-//$RoomID = $_GET["RoomID"]; 
-//$DeviceNo = $_GET["deviceNo"];
-//$host = $_GET["host"];
-//$port = $_GET["port"];
-include('read.php'); // include the variables
-
-
-// converting the send string into base64
-function hex_to_base64($hex){
-  $return = '';
-  foreach(str_split($hex, 2) as $pair){
-    $return .= chr(hexdec($pair));
-  }
-  return base64_encode($return);
-}  
-
-
+$temp = $argv[6]; if($temp == "x") { $temp = $deviceconf[$DeviceRF]["Temperature"]; }
+$mode = $argv[7]; if($mode == "") { $mode = $deviceconf[$DeviceRF]["Mode"]; }
 //get data from the cube
 if ($data && $deviceconf)
 {
@@ -47,32 +32,28 @@ $data = unserialize(file_get_contents('data/'.$host.'.txt'));
 $deviceconf = unserialize(file_get_contents('data/'.$host.'_dev.txt'));
 }
 
-// Check the Status of the thermostat defined. And see if temp or mode should be changed. Returned in json format
-switch($type) {
-  case ("status"):
+
+// only status call
+if($type == "status") {
 	$status = array('actTemp' => $deviceconf[$DeviceRF]["Temperature"], 'mode' => $deviceconf[$DeviceRF]["Mode"], 'comfyTemp' => $deviceconf[$DeviceRF]["ComfortTemperature"], 'ecoTemp' => $deviceconf[$DeviceRF]["EcoTemperature"]);
    echo json_encode($status);
    exit();
-   break;
+   }
+// check if max.php is here
+elseif($type == "check") { echo "found"; exit(); }
 
-  case ("check"):
-   echo "found";
-   exit();
-   break;
-  
-  case ("mode"):
-   $mode = $cmd;
-   break;
+$cmd_log = "Host: ".$host." Port: ".$port." RoomID: ".$RoomID." Device: ".$DeviceRF." Type: ".$type." temp: ".$temp." mode: ".$mode;
+echo $cmd_log;
 
-  case ("temp"):
-   $temp = $cmd;
-   break;
 
-  default:
-  echo "No case...";
-  break;
-	
-}
+// converting the send string into base64
+function hex_to_base64($hex){
+  $return = '';
+  foreach(str_split($hex, 2) as $pair){
+    $return .= chr(hexdec($pair));
+  }
+  return base64_encode($return);
+}  
 
 $fp = @fsockopen($host, $port, $errno, $errstr, 5);
 $finished = 0;
@@ -120,6 +101,11 @@ while (!feof($fp) && time() < $jetzt+20 && $finished == 0)
 
 
 fclose($fp);
+
+$logfile = fopen("logfile.log", "a"); // wird die Logdatei geöffnet
+    $error = date("d.m.Y H:i:s")." - ".$cmd_log." \r\n"; // und die Fehlermeldung (inkl. Datum/Uhrzeit und dem Query)
+    fwrite($logfile, $error); // in die Logdatei geschrieben
+    fclose($logfile); // und zum Schluss wird die Logdatei wieder geschlossen
 //echo $return."<br>";
 //echo $temp." temp<br>";
 //echo $mode." mode<br>";

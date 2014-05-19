@@ -30,9 +30,9 @@ module.exports = (env) ->
 
     checkBinary: ->
       command = "php #{plugin.config.binary}" # define the binary
-      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "check" # see if max.php is there
+      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += " check" # see if max.php is there
       exec(command).catch( (error) ->
         if error.message.match "not found"
           env.logger.error "max.php binary not found. Check your config!"
@@ -96,9 +96,9 @@ module.exports = (env) ->
       if @_state? then return Q @_state
       # Built the command to get the thermostat status
       command = "php #{plugin.config.binary}" # define the binary
-      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "status" # get status of the thermostat
+      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += " status" # get status of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
@@ -109,6 +109,7 @@ module.exports = (env) ->
         config.mode = data.mode
         config.comfyTemp = data.comfyTemp
         config.ecoTemp = data.ecoTemp
+        env.logger.info command
         @_setMode(data.mode)
       )
 
@@ -117,14 +118,16 @@ module.exports = (env) ->
       if @mode is mode then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
-      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "mode #{@mode}" # set mode of the thermostat
+      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += " mode x #{@mode}" # set mode of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
+        env.logger.info command
+        env.logger.info "Test"
         @_setMode(mode)
        )
 
@@ -132,14 +135,15 @@ module.exports = (env) ->
       if @temperature is temperature then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
-      command += "#{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-      command += "#{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "temp #{@temperature}" # set temperature of the thermostat
+      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += " temp #{@temperature}" # set temperature of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
+        env.logger.info command
         @_setMode(mode)
       )
     getTemplateName: -> "MaxThermostatDevice"
