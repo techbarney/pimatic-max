@@ -32,7 +32,7 @@ module.exports = (env) ->
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
       command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += " check" # see if max.php is there
+      command += "check" # see if max.php is there
       exec(command).catch( (error) ->
         if error.message.match "not found"
           env.logger.error "max.php binary not found. Check your config!"
@@ -120,30 +120,30 @@ module.exports = (env) ->
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
       command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += " mode x #{@mode}" # set mode of the thermostat
+      command += " mode x #{mode}" # set mode of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
-        env.logger.info command
-        env.logger.info "Test"
+        env.logger.info "Changed mode to #{mode}"
         @_setMode(mode)
        )
 
-    changeTermperatureTo: (temperature) ->
+    changeTemperatureTo: (temperature) ->
       if @temperature is temperature then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
       command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += " temp #{@temperature}" # set temperature of the thermostat
+      command += " temp #{temperature}" # set temperature of the thermostat
       # and execue it.
       return exec(command).then( (streams) =>
         stdout = streams[0]
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
         env.logger.info command
+        env.logger.info "Changed temperature to #{temperature}"
         @_setMode(mode)
       )
     getTemplateName: -> "MaxThermostatDevice"

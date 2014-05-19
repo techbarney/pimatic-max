@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 error_reporting(0);
 // use static values for testing... TODO: Remove once everything is working

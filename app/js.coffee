@@ -22,7 +22,7 @@ $(document).on( "templateinit", (event) ->
       # input changes -> call changeTemperatue
       @inputValue.subscribe( (textValue) =>
         if parseFloat(stAttr.value()) isnt parseFloat(textValue)
-          @changeTermperatureTo(parseFloat(textValue))
+          @changeTemperatureTo(parseFloat(textValue))
       )
 
       # Do something, after create: console.log(this)
@@ -34,12 +34,12 @@ $(document).on( "templateinit", (event) ->
     modeAuto: -> @changeModeTo "auto"
     modeManu: -> @changeModeTo "manu"
     modeBoost: -> @changeModeTo "boost"
-    modeEco: -> @changeTermperatureTo @config.ecoTemp
-    modeComfy: -> @changeTermperatureTo @config.comfyTemp
-    modeVac: -> @changeTermperatureTo @config.vacTemp
-    tempPlus: -> @changeTermperatureTo @config.actTemp+0,5
-    tempMinus: -> @changeTermperatureTo @config.actTemp-0,5
-    setTemp: -> @changeTermperatureTo @temperature
+    modeEco: -> @changeTemperatureTo @config.ecoTemp
+    modeComfy: -> @changeTemperatureTo @config.comfyTemp
+    modeVac: -> @changeTemperatureTo @config.vacTemp
+    tempPlus: -> @changeTemperatureTo @config.actTemp+0,5
+    tempMinus: -> @changeTemperatureTo @config.actTemp-0,5
+    setTemp: -> @changeTemperatureTo @temperature
 
     changeModeTo: (mode) ->
       $.ajax(
@@ -47,9 +47,9 @@ $(document).on( "templateinit", (event) ->
         data: {mode}
       ).fail(ajaxAlertFail)
 
-    changeTermperatureTo: (settemperature) ->
+    changeTemperatureTo: (settemperature) ->
       $.ajax(
-        url:"/api/device/#{@deviceId}/changeTermperatureTo"        
+        url:"/api/device/#{@deviceId}/changeTemperatureTo"        
         data: {settemperature}
       ).fail(ajaxAlertFail)
       
