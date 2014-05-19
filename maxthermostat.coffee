@@ -81,6 +81,7 @@ module.exports = (env) ->
 
       @name = config.name
       @id = config.id
+      @getState()
       super()
 
     getMode: () -> Q(@_mode)
@@ -90,6 +91,11 @@ module.exports = (env) ->
       if mode is @_mode then return
       @_mode = mode
       @emit "mode", @_mode
+
+    _setTemp: (settemperature) ->
+      if settemperature is @_settemperature then return
+      @_settemperature = settemperature
+      @emit "settemperature", @_settemperature
 
 
     getState: () ->
@@ -111,6 +117,7 @@ module.exports = (env) ->
         config.ecoTemp = data.ecoTemp
         env.logger.info command
         @_setMode(data.mode)
+        @_setTemp(data.actTemp)
       )
 
 
@@ -131,7 +138,7 @@ module.exports = (env) ->
        )
 
     changeTemperatureTo: (temperature) ->
-      if @temperature is temperature then return
+      if @settemperature is temperature then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
@@ -143,8 +150,8 @@ module.exports = (env) ->
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
         env.logger.info command
-        env.logger.info "Changed temperature to #{temperature}"
-        @_setMode(mode)
+        env.logger.info "Changed temperature to #{temperature} °C"
+        @_setTemp(temperature)
       )
     getTemplateName: -> "MaxThermostatDevice"
 

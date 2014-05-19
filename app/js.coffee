@@ -12,6 +12,38 @@ $(document).on( "templateinit", (event) ->
 
       modeAttr = @getAttribute('mode')
       # todo: do something with mode: maybe highlight the button
+      switch modeAttr
+        when 'auto'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.addClass('ui-btn-active')
+        when 'manu'
+          @manuButton.addClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+        when 'boost'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.addClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+          # todo: find a way to implement same behaviour for eco and comfy mode
+        when 'eco'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.addClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+        when 'comfy'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.addClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
 
       # settemperature changes -> update input
       stAttr = @getAttribute('settemperature')
@@ -26,7 +58,7 @@ $(document).on( "templateinit", (event) ->
       )
 
       # Do something, after create: console.log(this)
-    afterRender: (elements) -> 
+    afterRender: (elements) ->
       super(elements)
       # Do something after the html-element was added
 
@@ -49,7 +81,7 @@ $(document).on( "templateinit", (event) ->
 
     changeTemperatureTo: (settemperature) ->
       $.ajax(
-        url:"/api/device/#{@deviceId}/changeTemperatureTo"        
+        url:"/api/device/#{@deviceId}/changeTemperatureTo"
         data: {settemperature}
       ).fail(ajaxAlertFail)
       
