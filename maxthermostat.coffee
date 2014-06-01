@@ -118,6 +118,7 @@ module.exports = (env) ->
         env.logger.info command
         @_setMode(data.mode)
         @_setTemp(data.actTemp)
+        plugin.framework.saveConfig()
       )
 
 
