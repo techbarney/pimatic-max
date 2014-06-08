@@ -3,6 +3,7 @@ module.exports = (env) ->
   Q = env.require 'q'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
+  t = env.require('decl-api').types
 
   exec = Q.denodeify(require("child_process").exec)
  
@@ -55,20 +56,21 @@ module.exports = (env) ->
     attributes:
       settemperature:
         description: "the temp that should be set"
-        type: Number
+        type: t.number
       mode:
         description: "the current mode"
-        type: ["auto", "manu", "boost"]
+        type: t.string
+        oneOf: ["auto", "manu", "boost"]
 
     actions:
       changeModeTo:
         params: 
           mode: 
-            type: String
+            type: t.string
       changeTemperatureTo:
         params: 
           settemperature: 
-            type: Number
+            type: t.number
 
     _mode: "auto"
     _settemperature: null
