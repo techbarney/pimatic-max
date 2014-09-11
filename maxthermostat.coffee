@@ -1,10 +1,12 @@
 module.exports = (env) ->
   convict = env.require "convict"
-  Q = env.require 'q'
+  Q = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
+  
+  
 
-  exec = Q.denodeify(require("child_process").exec)
+  exec = Q.promisify(require("child_process").exec)
  
   class MaxThermostat extends env.plugins.Plugin
  
