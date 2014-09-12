@@ -1,21 +1,26 @@
 module.exports = (env) ->
   convict = env.require "convict"
-  Q = env.require 'q'
+  Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
   
   
 
-  exec = Q.denodify(require("child_process").exec)
+  exec = Promise.promisify(require("child_process").exec)
  
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, config) =>
-      conf = convict require("./maxthermostat-config-schema")
-      conf.load config
-      conf.validate()
-      @config = conf.get ""
       @checkBinary()
+
+      @isDemo = config.demo
+
+      deviceConfigDef = require("./device-config-schema")
+
+      @framework.registerDeviceClass("MaxThermostatDevice", {
+      configDef: deviceConfigDef.MaxThermostatDevice, 
+      createCallback: (deviceConfig) => new MaxThermostatDevice(deviceConfig)
+      })
 
       # wait till all plugins are loaded
       @framework.on "after init", =>
@@ -30,64 +35,33 @@ module.exports = (env) ->
 
 
 
-    checkBinary: ->
-      command = "php #{plugin.config.binary}" # define the binary
-      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-      command += "check" # see if max.php is there
-      exec(command).catch( (error) ->
-        if error.message.match "not found"
-          env.logger.error "max.php binary not found. Check your config!"
-        else
-          env.logger.info "Found max.php"
-      ).done()
- 
-    createDevice: (deviceConfig) =>
-      switch deviceConfig.class
-        when "MaxThermostatDevice"
-          @framework.registerDevice(new MaxThermostatDevice deviceConfig)
-          return true
-        else
-          return false
+      checkBinary: ->
+        command = "php #{plugin.config.binary}" # define the binary
+        command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+        command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+        command += "check" # see if max.php is there
+        exec(command).catch( (error) ->
+          if error.message.match "not found"
+            env.logger.error "max.php binary not found. Check your config!"
+          else
+            env.logger.info "Found max.php"
+        ).done()
 
   plugin = new MaxThermostat
  
   class MaxThermostatDevice extends env.devices.Device
 
-    attributes:
-      settemperature:
-        description: "the temp that should be set"
-        type: Number
-      mode:
-        description: "the current mode"
-        type: ["auto", "manu", "boost"]
-
-    actions:
-      changeModeTo:
-        params: 
-          mode: 
-            type: String
-      changeTemperatureTo:
-        params: 
-          settemperature: 
-            type: Number
-
     _mode: "auto"
     _settemperature: null
  
-    constructor: (config) ->
-      conf = convict _.cloneDeep(require("./device-config-schema"))
-      conf.load config
-      conf.validate()
-      @config = conf.get ""
-
-      @name = config.name
-      @id = config.id
+    constructor: (@config) ->
+      @id = deviceconfig.id
+      @name = deviceconfig.name
       @getState()
       super()
 
-    getMode: () -> Q(@_mode)
-    getSettemperature: () -> Q(@_settemperature)
+    getMode: () -> Promise.resolve (@_mode)
+    getSettemperature: () -> Promise.resolve (@_settemperature)
 
     _setMode: (mode) ->
       if mode is @_mode then return
@@ -101,7 +75,7 @@ module.exports = (env) ->
 
 
     getState: () ->
-      if @_state? then return Q @_state
+      if @_state? then return Promise.resolve @_state
       # Built the command to get the thermostat status
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
