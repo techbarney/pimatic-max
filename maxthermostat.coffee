@@ -51,18 +51,18 @@ module.exports = (env) ->
         type: "number"
       mode:
         description: "the current mode"
-        type: t.string
+        type: "string"
         enum: ["auto", "manu", "boost"]
 
     actions:
       changeModeTo:
         params: 
           mode: 
-            type: t.string
+            type: "string"
       changeTemperatureTo:
         params: 
           settemperature: 
-            type: t.number
+            type: "number"
 
     template: "MaxThermostatDevice"
 
@@ -127,7 +127,7 @@ module.exports = (env) ->
         env.logger.debug stderr if stderr.length isnt 0
         env.logger.info "Changed mode to #{mode}"
         @_setMode(mode)
-       )
+      )
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
