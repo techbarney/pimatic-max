@@ -23,16 +23,16 @@
         var deviceConfigDef,
           _this = this;
         this.framework = framework;
+        this.config = config;
         this.checkBinary();
-        this.isDemo = config.demo;
         deviceConfigDef = require("./device-config-schema");
-        this.framework.registerDeviceClass("MaxThermostatDevice", {
+        this.framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
           configDef: deviceConfigDef.MaxThermostatDevice,
-          createCallback: function(deviceConfig) {
-            return new MaxThermostatDevice(deviceConfig);
+          createCallback: function(config) {
+            return new MaxThermostatDevice(config);
           }
         });
-        this.framework.on("after init", function() {
+        return this.framework.on("after init", function() {
           var mobileFrontend;
           mobileFrontend = _this.framework.getPlugin('mobile-frontend');
           if (mobileFrontend != null) {
@@ -42,22 +42,21 @@
             return env.logger.warn("MaxThermostat could not find the mobile-frontend. No gui will be available");
           }
         });
-        return {
-          checkBinary: function() {
-            var command;
-            command = "php " + plugin.config.binary;
-            command += " " + plugin.config.host + " " + plugin.config.port;
-            command += " " + this.config.RoomID + " " + this.config.deviceNo;
-            command += "check";
-            return exec(command)["catch"](function(error) {
-              if (error.message.match("not found")) {
-                return env.logger.error("max.php binary not found. Check your config!");
-              } else {
-                return env.logger.info("Found max.php");
-              }
-            }).done();
+      };
+
+      MaxThermostat.prototype.checkBinary = function() {
+        var command;
+        command = "php " + plugin.config.binary;
+        command += " " + plugin.config.host + " " + plugin.config.port;
+        command += " " + this.config.RoomID + " " + this.config.deviceNo;
+        command += "check";
+        return exec(command)["catch"](function(error) {
+          if (error.message.match("not found")) {
+            return env.logger.error("max.php binary not found. Check your config!");
+          } else {
+            return env.logger.info("max.php binary found");
           }
-        };
+        }).done();
       };
 
       return MaxThermostat;

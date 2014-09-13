@@ -10,16 +10,12 @@ module.exports = (env) ->
  
   class MaxThermostat extends env.plugins.Plugin
  
-    init: (app, @framework, config) =>
+    init: (app, @framework, @config) =>
       @checkBinary()
-
-      @isDemo = config.demo
-
       deviceConfigDef = require("./device-config-schema")
-
-      @framework.registerDeviceClass("MaxThermostatDevice", {
-      configDef: deviceConfigDef.MaxThermostatDevice, 
-      createCallback: (deviceConfig) => new MaxThermostatDevice(deviceConfig)
+      @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
+        configDef: deviceConfigDef.MaxThermostatDevice,
+        createCallback: (config) -> new MaxThermostatDevice(config)
       })
 
       # wait till all plugins are loaded
@@ -35,17 +31,17 @@ module.exports = (env) ->
 
 
 
-      checkBinary: ->
-        command = "php #{plugin.config.binary}" # define the binary
-        command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
-        command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
-        command += "check" # see if max.php is there
-        exec(command).catch( (error) ->
-          if error.message.match "not found"
-            env.logger.error "max.php binary not found. Check your config!"
-          else
-            env.logger.info "Found max.php"
-        ).done()
+    checkBinary: ->
+      command = "php #{plugin.config.binary}" # define the binary
+      command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
+      command += " #{@config.RoomID} #{@config.deviceNo}" # select the RoomID and deviceNo
+      command += "check" # see if max.php is there
+      exec(command).catch( (error) ->
+        if error.message.match "not found"
+          env.logger.error "max.php binary not found. Check your config!"
+        else
+          env.logger.info "max.php binary found" # debug message
+      ).done()
 
   plugin = new MaxThermostat
  
@@ -91,7 +87,7 @@ module.exports = (env) ->
         config.mode = data.mode
         config.comfyTemp = data.comfyTemp
         config.ecoTemp = data.ecoTemp
-        env.logger.info command
+        env.logger.info command # debug message
         @_setMode(data.mode)
         @_setTemp(data.actTemp)
         plugin.framework.saveConfig()
