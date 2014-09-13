@@ -7,8 +7,8 @@ $(document).on( "templateinit", (event) ->
     # The value in the input
     inputValue: ko.observable()
 
-    constructor: (data) ->
-      super(data)
+    constructor: (templData, @device) ->
+      super(templData, @device)
 
       modeAttr = @getAttribute('mode')
       # todo: do something with mode: maybe highlight the button
@@ -74,16 +74,14 @@ $(document).on( "templateinit", (event) ->
     setTemp: -> @changeTemperatureTo @temperature
 
     changeModeTo: (mode) ->
-      $.ajax(
-        url: "/api/device/#{@deviceId}/changeModeTo"
-        data: {mode}
-      ).fail(ajaxAlertFail)
+      @device.rest.changeModeTo({mode}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
 
     changeTemperatureTo: (settemperature) ->
-      $.ajax(
-        url:"/api/device/#{@deviceId}/changeTemperatureTo"
-        data: {settemperature}
-      ).fail(ajaxAlertFail)
+      @device.rest.changeTemperatureTo({settemperature}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
       
   # register the item-class
   pimatic.templateClasses['MaxThermostatDevice'] = MaxThermostatDeviceItem
