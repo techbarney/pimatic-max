@@ -1,33 +1,31 @@
-# #MaxThermostat Device configuration options
-
-# Defines a `node-convict` config-schema and exports it.
-
-module.exports =
+module.exports = {
+  title: "max-thermostat device config schemas"
   roomID:
-    doc: "The RoomID - find out with read.php"
-    format: "int"
+    description: "The RoomID - find out with read.php"
+    type: "int"
     default: 1
   deviceNo:
-    doc: "The Device RF No - find out with read.php"
-    format: String
+    description: "The Device RF No - find out with read.php"
+    type: "string"
     default: ""
   comfyTemp:
-    doc: "The defined comfy temperature"
-    format: "int"
+    description: "The defined comfy temperature"
+    type: "int"
     default: 21
   ecoTemp:
-    doc: "The defined eco mode temperature"
-    format: "int"
+    description: "The defined eco mode temperature"
+    type: "int"
     default: 17
   vacTemp:
-    doc: "The defined vacation mode temperature"
-    format: "int"
+    description: "The defined vacation mode temperature"
+    type: "int"
     default: 14
   actTemp: 
-    doc: "The actual temperatur"
-    format: "int"
+    description: "The actual temperatur"
+    type: "int"
     default: 21
   mode: 
-    doc: "The mode of the thermostat (auto/manual/boost)"
-    format: String
+    description: "The mode of the thermostat (auto/manual/boost)"
+    type: "string"
     default: "auto"
+}

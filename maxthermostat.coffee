@@ -1,19 +1,21 @@
 module.exports = (env) ->
+
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
-  t = env.require('decl-api').types
 
   exec = Promise.promisify(require("child_process").exec)
  
   class MaxThermostat extends env.plugins.Plugin
  
-    init: (app, @framework, config) =>
-      conf = convict require("./maxthermostat-config-schema")
-      conf.load config
-      conf.validate()
-      @config = conf.get ""
+    init: (app, @framework, @config) =>
       @checkBinary()
+
+      deviceConfigDef = require("./device-config-schema")
+      @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
+        configDef: deviceConfigDef.MaxThermostatDevice,
+        createCallback: (config) -> new MaxThermostatDevice(config)
+      })
 
       # wait till all plugins are loaded
       @framework.on "after init", =>
@@ -26,8 +28,6 @@ module.exports = (env) ->
         else
           env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
 
-
-
     checkBinary: ->
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
@@ -37,16 +37,9 @@ module.exports = (env) ->
         if error.message.match "not found"
           env.logger.error "max.php binary not found. Check your config!"
         else
-          env.logger.info "Found max.php"
+          env.logger.info "max.php binary found" # debug message
       ).done()
- 
-    createDevice: (deviceConfig) =>
-      switch deviceConfig.class
-        when "MaxThermostatDevice"
-          @framework.deviceManager.registerDevice(new MaxThermostatDevice deviceConfig)
-          return true
-        else
-          return false
+
 
   plugin = new MaxThermostat
  
@@ -55,7 +48,7 @@ module.exports = (env) ->
     attributes:
       settemperature:
         description: "the temp that should be set"
-        type: t.number
+        type: "number"
       mode:
         description: "the current mode"
         type: t.string
@@ -74,14 +67,10 @@ module.exports = (env) ->
     _mode: "auto"
     _settemperature: null
  
-    constructor: (config) ->
-      conf = convict _.cloneDeep(require("./device-config-schema"))
-      conf.load config
-      conf.validate()
-      @config = conf.get ""
-
-      @name = config.name
-      @id = config.id
+    constructor: (@config) ->
+      @id = @config.id
+      @name = @config.name
+      @getState()
       super()
 
     getMode: () -> Promise.resolve(@_mode)
@@ -91,6 +80,11 @@ module.exports = (env) ->
       if mode is @_mode then return
       @_mode = mode
       @emit "mode", @_mode
+
+    _setTemp: (settemperature) ->
+      if settemperature is @_settemperature then return
+      @_settemperature = settemperature
+      @emit "settemperature", @_settemperature
 
 
     getState: () ->
@@ -110,8 +104,10 @@ module.exports = (env) ->
         config.mode = data.mode
         config.comfyTemp = data.comfyTemp
         config.ecoTemp = data.ecoTemp
-        env.logger.info command
+        env.logger.info command # debug message
         @_setMode(data.mode)
+        @_setTemp(data.actTemp)
+        plugin.framework.saveConfig()
       )
 
 
@@ -132,7 +128,7 @@ module.exports = (env) ->
        )
 
     changeTemperatureTo: (temperature) ->
-      if @temperature is temperature then return
+      if @settemperature is temperature then return
       # Built the command
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
@@ -144,8 +140,8 @@ module.exports = (env) ->
         stderr = streams[1]
         env.logger.debug stderr if stderr.length isnt 0
         env.logger.info command
-        env.logger.info "Changed temperature to #{temperature}"
-        @_setMode(mode)
+        env.logger.info "Changed temperature to #{temperature} °C"
+        @_setTemp(temperature)
       )
     getTemplateName: -> "MaxThermostatDevice"
 

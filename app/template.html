@@ -4,9 +4,9 @@
     <div class="controls">
       <div data-role="controlgroup" data-type="horizontal" data-mini="true" class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
         <div class="ui-controlgroup-controls ">
-          <a class="ui-btn ui-corner-all" data-bind="click: modeAuto">Auto</a>
-          <a class="ui-btn ui-corner-all" data-bind="click: modeManu">Manu</a>
-          <a class="ui-btn ui-corner-all" data-bind="click: modeBoost">Boost</a>
+          <a class="ui-btn ui-corner-all" name="autoButton" data-bind="click: modeAuto">Auto</a>
+          <a class="ui-btn ui-corner-all" name="manuButton" data-bind="click: modeManu">Manu</a>
+          <a class="ui-btn ui-corner-all" name="boostButton" data-bind="click: modeBoost">Boost</a>
         </div>
       </div>
     </div>
@@ -16,9 +16,9 @@
     <div class="controls">
       <div data-role="controlgroup" data-type="horizontal" data-mini="true" class="ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
         <div class="ui-controlgroup-controls ">
-          <a class="ui-btn ui-corner-all" data-bind="click: modeEco">Eco</a>
-          <a class="ui-btn ui-corner-all" data-bind="click: modeComfy">Comfy</a>
-          <input data-bind="value: inputValue" type="number" data-clear-btn="false" name="number-1" id="number-1" value="">
+          <a class="ui-btn ui-corner-all" name="ecoButton" data-bind="click: modeEco">Eco</a>
+          <a class="ui-btn ui-corner-all" name="comfyButton" data-bind="click: modeComfy">Comfy</a>       
+          <input data-bind="value: inputValue" type="number" data-clear-btn="false" name="number-1" id="number-1" value="inputValue">
         </div>
       </div>
     </div>
