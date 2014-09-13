@@ -72,7 +72,10 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
-      @getState()
+      @getState().catch( (error) =>
+        env.logger.error "error getting state: #{error.message}"
+        env.logger.debug error.stack
+      )
       super()
 
     getMode: () -> Promise.resolve(@_mode)

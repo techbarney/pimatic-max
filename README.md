@@ -12,7 +12,7 @@ Configuration
 You can load the plugin by editing your `config.json` to include:
 
     { 
-       "plugin": "MaxThermostat",
+       "plugin": "max-thermostat",
        "host": "192.168.X.X",
        "port": 62910,
        "binary": "./max.php"
@@ -28,7 +28,7 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
       "id": "bathroomLeft",
       "class": "MaxThermostatDevice", 
       "name": "Bathroom Radiator left",
-      "RoomID": 1,
+      "roomID": 1,
       "deviceNo": "12345cf",
       "comfyTemp": 23.0,
       "ecoTemp": 17.5,

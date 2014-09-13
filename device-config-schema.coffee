@@ -14,19 +14,19 @@ module.exports = {
         default: ""
       comfyTemp:
         description: "The defined comfy temperature"
-        type: "integer"
+        type: "number"
         default: 21
       ecoTemp:
         description: "The defined eco mode temperature"
-        type: "integer"
+        type: "number"
         default: 17
       vacTemp:
         description: "The defined vacation mode temperature"
-        type: "integer"
+        type: "number"
         default: 14
       actTemp: 
         description: "The actual temperatur"
-        type: "integer"
+        type: "number"
         default: 21
       mode: 
         description: "The mode of the thermostat (auto/manual/boost)"
