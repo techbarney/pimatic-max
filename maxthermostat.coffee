@@ -1,11 +1,10 @@
 module.exports = (env) ->
-  convict = env.require "convict"
-  Q = env.require 'q'
+  Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
   t = env.require('decl-api').types
 
-  exec = Q.denodeify(require("child_process").exec)
+  exec = Promise.promisify(require("child_process").exec)
  
   class MaxThermostat extends env.plugins.Plugin
  
@@ -19,7 +18,7 @@ module.exports = (env) ->
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
-        mobileFrontend = @framework.getPlugin 'mobile-frontend'
+        mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
           # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
@@ -44,7 +43,7 @@ module.exports = (env) ->
     createDevice: (deviceConfig) =>
       switch deviceConfig.class
         when "MaxThermostatDevice"
-          @framework.registerDevice(new MaxThermostatDevice deviceConfig)
+          @framework.deviceManager.registerDevice(new MaxThermostatDevice deviceConfig)
           return true
         else
           return false
@@ -60,7 +59,7 @@ module.exports = (env) ->
       mode:
         description: "the current mode"
         type: t.string
-        oneOf: ["auto", "manu", "boost"]
+        enum: ["auto", "manu", "boost"]
 
     actions:
       changeModeTo:
@@ -85,8 +84,8 @@ module.exports = (env) ->
       @id = config.id
       super()
 
-    getMode: () -> Q(@_mode)
-    getSettemperature: () -> Q(@_settemperature)
+    getMode: () -> Promise.resolve(@_mode)
+    getSettemperature: () -> Promise.resolve(@_settemperature)
 
     _setMode: (mode) ->
       if mode is @_mode then return
@@ -95,7 +94,7 @@ module.exports = (env) ->
 
 
     getState: () ->
-      if @_state? then return Q @_state
+      if @_state? then return Promise.resolve @_state
       # Built the command to get the thermostat status
       command = "php #{plugin.config.binary}" # define the binary
       command += " #{plugin.config.host} #{plugin.config.port}" # select the host and port of the cube
