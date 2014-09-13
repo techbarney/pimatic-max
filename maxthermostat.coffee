@@ -64,6 +64,8 @@ module.exports = (env) ->
           settemperature: 
             type: t.number
 
+    template: "MaxThermostatDevice"
+
     _mode: "auto"
     _settemperature: null
  
@@ -143,6 +145,5 @@ module.exports = (env) ->
         env.logger.info "Changed temperature to #{temperature} °C"
         @_setTemp(temperature)
       )
-    getTemplateName: -> "MaxThermostatDevice"
 
   return plugin
