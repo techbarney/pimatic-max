@@ -1,10 +1,8 @@
 module.exports = (env) ->
-  convict = env.require "convict"
+
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
-  
-  
 
   exec = Promise.promisify(require("child_process").exec)
  
@@ -12,6 +10,7 @@ module.exports = (env) ->
  
     init: (app, @framework, @config) =>
       @checkBinary()
+
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
@@ -21,15 +20,13 @@ module.exports = (env) ->
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
-        mobileFrontend = @framework.getPlugin 'mobile-frontend'
+        mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
           # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
         else
           env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
-
-
 
     checkBinary: ->
       command = "php #{plugin.config.binary}" # define the binary
@@ -43,21 +40,46 @@ module.exports = (env) ->
           env.logger.info "max.php binary found" # debug message
       ).done()
 
+
   plugin = new MaxThermostat
  
   class MaxThermostatDevice extends env.devices.Device
+
+    attributes:
+      settemperature:
+        description: "the temp that should be set"
+        type: "number"
+      mode:
+        description: "the current mode"
+        type: "string"
+        enum: ["auto", "manu", "boost"]
+
+    actions:
+      changeModeTo:
+        params: 
+          mode: 
+            type: "string"
+      changeTemperatureTo:
+        params: 
+          settemperature: 
+            type: "number"
+
+    template: "MaxThermostatDevice"
 
     _mode: "auto"
     _settemperature: null
  
     constructor: (@config) ->
-      @id = deviceconfig.id
-      @name = deviceconfig.name
-      @getState()
+      @id = @config.id
+      @name = @config.name
+      @getState().catch( (error) =>
+        env.logger.error "error getting state: #{error.message}"
+        env.logger.debug error.stack
+      )
       super()
 
-    getMode: () -> Promise.resolve (@_mode)
-    getSettemperature: () -> Promise.resolve (@_settemperature)
+    getMode: () -> Promise.resolve(@_mode)
+    getSettemperature: () -> Promise.resolve(@_settemperature)
 
     _setMode: (mode) ->
       if mode is @_mode then return
@@ -108,7 +130,7 @@ module.exports = (env) ->
         env.logger.debug stderr if stderr.length isnt 0
         env.logger.info "Changed mode to #{mode}"
         @_setMode(mode)
-       )
+      )
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
@@ -126,6 +148,5 @@ module.exports = (env) ->
         env.logger.info "Changed temperature to #{temperature} °C"
         @_setTemp(temperature)
       )
-    getTemplateName: -> "MaxThermostatDevice"
 
   return plugin
