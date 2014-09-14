@@ -106,7 +106,7 @@ module.exports = (env) ->
         setTimeout (->
           console.log "send"
           # mode: auto, manual, boost
-          plugin.mc.setTemperature "#{@config.deviceNo}", mode, 20 #TODO: Post data to plugin..not working now!
+          plugin.mc.setTemperature @config.deviceNo, mode, 20 #TODO: Post data to plugin..not working now!
           return
         ), 5000
         return
@@ -121,7 +121,7 @@ module.exports = (env) ->
         setTimeout (->
           console.log "send"
           # mode: auto, manual, boost
-          plugin.mc.setTemperature "#{@config.deviceNo}", "#{@config.mode}", temperature  #TODO: Post data to plugin..not working now!
+          plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  #TODO: Post data to plugin..not working now!
           return
         ), 5000
         return
