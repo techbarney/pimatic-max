@@ -3,7 +3,7 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
-  MaxCube = require("./max")
+  MaxCube = require 'max-control'
  
   class MaxThermostat extends env.plugins.Plugin
  
