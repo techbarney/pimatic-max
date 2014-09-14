@@ -8,6 +8,7 @@ module.exports = (env) ->
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
+      mc = new MaxCube(plugin.config.host, plugin.config.port)
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
@@ -53,7 +54,6 @@ module.exports = (env) ->
 
     _mode: "auto"
     _settemperature: null
-    mc = new MaxCube("192.168.0.107", 62910) #TODO: Use variables!
 
     constructor: (@config) ->
       @id = @config.id
