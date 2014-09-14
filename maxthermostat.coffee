@@ -8,7 +8,7 @@ module.exports = (env) ->
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
-      mc = new MaxCube(plugin.config.host, plugin.config.port)
+      @mc = new MaxCube(plugin.config.host, plugin.config.port)
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
@@ -58,10 +58,7 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
-      @getState().catch( (error) ->
-        env.logger.error "error getting state: #{error.message}"
-        env.logger.debug error.stack
-      )
+      @getState()
       
       super()
 
@@ -80,7 +77,7 @@ module.exports = (env) ->
 
     getState: () ->
       if @_state? then return Promise.resolve @_state
-      mc.on "update", (data) ->
+      plugin.mc.on "update", (data) ->
         env.logger.info "got update"
         env.logger.info data # TODO: Post data to plugin..not working now!
         return
@@ -88,7 +85,7 @@ module.exports = (env) ->
 
     changeModeTo: (mode) ->
       if @mode is mode then return
-      mc.on "connected", ->
+      plugin.mc.on "connected", ->
         console.log "ready"
         setTimeout (->
           console.log "send"
@@ -103,7 +100,7 @@ module.exports = (env) ->
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
-      mc.on "connected", ->
+      plugin.mc.on "connected", ->
         console.log "ready"
         setTimeout (->
           console.log "send"
