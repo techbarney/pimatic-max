@@ -99,7 +99,7 @@ module.exports = (env) ->
         return
         env.logger.info "Changed mode to #{mode}"
         @_setMode(mode)
-      )
+      
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
@@ -114,5 +114,6 @@ module.exports = (env) ->
         return
         @_setTemp(temperature)
         env.logger.info "Changed temperature to #{temperature} °C"
+      
 
   return plugin
