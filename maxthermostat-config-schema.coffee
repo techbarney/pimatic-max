@@ -10,8 +10,4 @@ module.exports = {
       description: "The port of the MAX! Cube (Default: 62910)"
       type: "integer"
       default: 62910
-    binary:
-      description: "The path to the max.php is located (without backslash!)"
-      type: "string"
-      default: "/path/to/max.php"
 }
