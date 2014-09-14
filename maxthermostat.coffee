@@ -100,26 +100,28 @@ module.exports = (env) ->
       
 
     changeModeTo: (mode) ->
-      if @mode is mode then return
+      env.logger.info "change mode max"
       plugin.mc.on "connected", ->
         console.log "ready"
+        env.logger.info "ready"
         setTimeout (->
+          env.logger.info "send"
           console.log "send"
           # mode: auto, manual, boost
           plugin.mc.setTemperature @config.deviceNo, mode, 20 #TODO: Post data to plugin..not working now!
           return
         ), 5000
-        return
         env.logger.info "Changed mode to #{mode}"
         @_setMode(mode)
+      return
       
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
       plugin.mc.on "connected", ->
-        console.log "ready"
+        env.logger.info "ready"
         setTimeout (->
-          console.log "send"
+          env.logger.info "send"
           # mode: auto, manual, boost
           plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  #TODO: Post data to plugin..not working now!
           return
@@ -127,6 +129,7 @@ module.exports = (env) ->
         return
         @_setTemp(temperature)
         env.logger.info "Changed temperature to #{temperature} °C"
+      return
       
 
   return plugin

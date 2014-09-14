@@ -75,6 +75,7 @@ $(document).on( "templateinit", (event) ->
     setTemp: -> @changeTemperatureTo @temperature
 
     changeModeTo: (mode) ->
+      console.log "change mode"
       @device.rest.changeModeTo({mode}, global: no)
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
