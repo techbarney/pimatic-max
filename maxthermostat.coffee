@@ -8,7 +8,19 @@ module.exports = (env) ->
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
-      @mc = new MaxCube(plugin.config.host, plugin.config.port)
+
+      # Promise that is resolved when the connection is established
+      @afterConnect = new Promise( (resolve, reject) =>
+        @mc = new MaxCube(plugin.config.host, plugin.config.port)
+        @mc.once("connected", resolve)
+        @mc.client.once('error', reject)
+        return
+      ).timeout(60000).catch( (error) =>
+        env.logger.error "Error on connecting to max cube: #{error.message}"
+        env.logger.debug error.stack
+        return
+      )
+
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
@@ -58,8 +70,20 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
-      @getState()
       
+      plugin.mc.on("update", (data) =>
+        keys = _.keys(data)
+        if keys.length is 1 and keys[0] is @config.deviceNo
+          data = data[@config.deviceNo]
+          @config.actTemp = data.setpoint
+          @config.mode = data.mode
+          @config.comfyTemp = data.comfortTemperature
+          @config.ecoTemp = data.ecoTemperature
+          @config.battery = data.battery
+          env.logger.info "got update"
+          env.logger.info data
+        return
+      )
       super()
 
     getMode: () -> Promise.resolve(@_mode)
@@ -75,61 +99,21 @@ module.exports = (env) ->
       @_settemperature = settemperature
       @emit "settemperature", @_settemperature
 
-    hasOwnProperty = Object::hasOwnProperty
-    isEmpty = (obj) ->
-      return true  unless obj?
-      return false  if obj.length and obj.length > 0
-      return true  if obj.length is 0
-      for key of obj
-        return false  if hasOwnProperty.call(obj, key)
-      true
-
-    getState: () ->
-      if @_state? then return Promise.resolve @_state
-      plugin.mc.on "update", (data) =>
-        if !isEmpty(data)
-          @config.actTemp = data[@config.deviceNo].setpoint
-          @config.mode = data[@config.deviceNo].mode
-          @config.comfyTemp = data[@config.deviceNo].comfortTemperature
-          @config.ecoTemp = data[@config.deviceNo].ecoTemperature
-          @config.battery = data[@config.deviceNo].battery
-          env.logger.info "got update"
-          env.logger.info data
-        return
-
-      
-
     changeModeTo: (mode) ->
-      env.logger.info "change mode max"
-      plugin.mc.on "connected", ->
-        console.log "ready"
-        env.logger.info "ready"
-        setTimeout (->
-          env.logger.info "send"
-          console.log "send"
-          # mode: auto, manual, boost
-          plugin.mc.setTemperature @config.deviceNo, mode, 20 #TODO: Post data to plugin..not working now!
-          return
-        ), 5000
-        env.logger.info "Changed mode to #{mode}"
-        @_setMode(mode)
-      return
-      
+      return plugin.afterConnect.then( =>
+        # mode: auto, manual, boost
+        plugin.mc.setTemperature @config.deviceNo, mode, 20 #TODO: Post data to plugin..not working now!
+        _setMode(mode)
+        return mode
+      )
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
-      plugin.mc.on "connected", ->
-        env.logger.info "ready"
-        setTimeout (->
-          env.logger.info "send"
-          # mode: auto, manual, boost
-          plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  #TODO: Post data to plugin..not working now!
-          return
-        ), 5000
-        return
+      return plugin.afterConnect.then( =>
+        # mode: auto, manual, boost
+        plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  #TODO: Post data to plugin..not working now!
         @_setTemp(temperature)
-        env.logger.info "Changed temperature to #{temperature} °C"
-      return
-      
+        return temperature
+      )
 
   return plugin
