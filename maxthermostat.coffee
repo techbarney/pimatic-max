@@ -4,7 +4,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   _ = env.require 'lodash'
   MaxCube = require 'max-control'
- 
+  
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
@@ -75,12 +75,28 @@ module.exports = (env) ->
       @_settemperature = settemperature
       @emit "settemperature", @_settemperature
 
+    hasOwnProperty = Object::hasOwnProperty
+    isEmpty = (obj) ->
+      return true  unless obj?
+      return false  if obj.length and obj.length > 0
+      return true  if obj.length is 0
+      for key of obj
+        return false  if hasOwnProperty.call(obj, key)
+      true
+
     getState: () ->
       if @_state? then return Promise.resolve @_state
-      plugin.mc.on "update", (data) ->
-        env.logger.info "got update"
-        env.logger.info data # TODO: Post data to plugin..not working now!
+      plugin.mc.on "update", (data) =>
+        if !isEmpty(data)
+          @config.actTemp = data[@config.deviceNo].setpoint
+          @config.mode = data[@config.deviceNo].mode
+          @config.comfyTemp = data[@config.deviceNo].comfortTemperature
+          @config.ecoTemp = data[@config.deviceNo].ecoTemperature
+          @config.battery = data[@config.deviceNo].battery
+          env.logger.info "got update"
+          env.logger.info data
         return
+
       
 
     changeModeTo: (mode) ->
@@ -90,7 +106,7 @@ module.exports = (env) ->
         setTimeout (->
           console.log "send"
           # mode: auto, manual, boost
-          mc.setTemperature @config.roomID, mode, 20 #TODO: Post data to plugin..not working now!
+          plugin.mc.setTemperature "#{@config.deviceNo}", mode, 20 #TODO: Post data to plugin..not working now!
           return
         ), 5000
         return
@@ -105,7 +121,7 @@ module.exports = (env) ->
         setTimeout (->
           console.log "send"
           # mode: auto, manual, boost
-          mc.setTemperature @config.roomID, @config.mode, temperature  #TODO: Post data to plugin..not working now!
+          plugin.mc.setTemperature "#{@config.deviceNo}", "#{@config.mode}", temperature  #TODO: Post data to plugin..not working now!
           return
         ), 5000
         return

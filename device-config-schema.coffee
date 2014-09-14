@@ -32,5 +32,13 @@ module.exports = {
         description: "The mode of the thermostat (auto/manual/boost)"
         type: "string"
         default: "auto" 
+      battery: 
+        description: "The battery status"
+        type: "string"
+        default: "ok" 
+      battery: 
+        description: "The battery status"
+        type: "string"
+        default: "" 
   }
 }
