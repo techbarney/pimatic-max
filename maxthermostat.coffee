@@ -74,9 +74,8 @@ module.exports = (env) ->
       @_settemperature = @config.actTemp
       
       plugin.mc.on("update", (data) =>
-        keys = _.keys(data)
-        if keys.length is 1 and keys[0] is @config.deviceNo
-          data = data[@config.deviceNo]
+        data = data[@config.deviceNo]
+        if data?
           @config.actTemp = data.setpoint
           @config.mode = data.mode
           @config.comfyTemp = data.comfortTemperature
