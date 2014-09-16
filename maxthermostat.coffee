@@ -70,6 +70,8 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
+
+      @_settemperature = @config.actTemp
       
       plugin.mc.on("update", (data) =>
         keys = _.keys(data)
