@@ -36,9 +36,5 @@ module.exports = {
         description: "The battery status"
         type: "string"
         default: "ok" 
-      battery: 
-        description: "The battery status"
-        type: "string"
-        default: "" 
   }
 }

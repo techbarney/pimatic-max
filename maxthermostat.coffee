@@ -36,7 +36,9 @@ module.exports = (env) ->
           # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
         else
-          env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
+          env.logger.warn(
+            "MaxThermostat could not find the mobile-frontend. No gui will be available"
+          )
 
 
   plugin = new MaxThermostat
@@ -70,11 +72,12 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
+
+      @_settemperature = @config.actTemp
       
       plugin.mc.on("update", (data) =>
-        keys = _.keys(data)
-        if keys.length is 1 and keys[0] is @config.deviceNo
-          data = data[@config.deviceNo]
+        data = data[@config.deviceNo]
+        if data?
           @config.actTemp = data.setpoint
           @config.mode = data.mode
           @config.comfyTemp = data.comfortTemperature
@@ -102,7 +105,8 @@ module.exports = (env) ->
     changeModeTo: (mode) ->
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
-        plugin.mc.setTemperature @config.deviceNo, mode, 20 #TODO: Post data to plugin..not working now!
+        #TODO: Post data to plugin..not working now!
+        plugin.mc.setTemperature @config.deviceNo, mode, 20 
         _setMode(mode)
         return mode
       )
@@ -111,7 +115,8 @@ module.exports = (env) ->
       if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
-        plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  #TODO: Post data to plugin..not working now!
+        #TODO: Post data to plugin..not working now!
+        plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
         @_setTemp(temperature)
         return temperature
       )
