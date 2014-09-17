@@ -7,8 +7,13 @@ Currently not working for 0.8!
 -------------
 
 
-Configuration
+
+Installation
 -------------
+1. 
+Clone this repository into your pimatic node_modules folder (eg. /home/pi/pimatic/node_modules)
+
+2. 
 You can load the plugin by editing your `config.json` to include (host = Max!Cube IP port=Max!Cube Port (default:62910)):
 
     { 
@@ -19,6 +24,13 @@ You can load the plugin by editing your `config.json` to include (host = Max!Cub
 
 in the `plugins` section.
 
+3.
+Also you'll need to install the connector software "max-control" written by https://github.com/aslansky
+In the install dir (eg. ../node_modules/pimatic-max-thermostat) do a `sudo npm install`
+
+
+Configuration
+-------------
 Use the debug output in pimatic to find out your roomID & available devices. Currently we only have support for thermostats!
 
 Sample debug output:
