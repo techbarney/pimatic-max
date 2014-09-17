@@ -12,7 +12,6 @@ $(document).on( "templateinit", (event) ->
 
       modeAttr = @getAttribute('mode').value()
       # todo: do something with mode: maybe highlight the button
-      console.log "mode is #{modeAttr}"
       # switch modeAttr
       #   when 'auto'
       #     @manuButton.removeClass('ui-btn-active')
@@ -52,7 +51,7 @@ $(document).on( "templateinit", (event) ->
         @inputValue(value)
       )
 
-      # input changes -> call changeTemperatue
+      # input changes -> call changeTemperature
       @inputValue.subscribe( (textValue) =>
         if parseFloat(stAttr.value()) isnt parseFloat(textValue)
           @changeTemperatureTo(parseFloat(textValue))
@@ -61,21 +60,26 @@ $(document).on( "templateinit", (event) ->
       # Do something, after create: console.log(this)
     afterRender: (elements) ->
       super(elements)
-      # Do something after the html-element was added
+      # find the buttons
+      @autoButton = $(elements).find('name=[autoButton]')
+      @manuButton = $(elements).find('name=[manuButton]')
+      @boostButton = $(elements).find('name=[boostButton]')
+      @ecoButton = $(elements).find('name=[ecoButton]')
+      @comfyButton = $(elements).find('name=[comfyButton]')
+      @vacButton = $(elements).find('name=[vacButton]')
 
     # define the available actions for the template
     modeAuto: -> @changeModeTo "auto"
     modeManu: -> @changeModeTo "manual"
     modeBoost: -> @changeModeTo "boost"
-    modeEco: -> @changeTemperatureTo @config.ecoTemp
-    modeComfy: -> @changeTemperatureTo @config.comfyTemp
-    modeVac: -> @changeTemperatureTo @config.vacTemp
-    tempPlus: -> @changeTemperatureTo @config.actTemp+0,5
-    tempMinus: -> @changeTemperatureTo @config.actTemp-0,5
-    setTemp: -> @changeTemperatureTo @temperature
+    modeEco: -> @changeTemperatureTo "#{@device.config.ecoTemp}"
+    modeComfy: -> @changeTemperatureTo "#{@device.config.comfyTemp}"
+    modeVac: -> @changeTemperatureTo "#{@device.config.vacTemp}"
+    tempPlus: -> @changeTemperatureTo "#{@device.config.actTemp+0.5}"
+    tempMinus: -> @changeTemperatureTo "#{@device.config.actTemp-0.5}"
+    setTemp: -> @changeTemperatureTo @temperature # TODO: put real temp in here!
 
     changeModeTo: (mode) ->
-      console.log "change mode"
       @device.rest.changeModeTo({mode}, global: no)
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)

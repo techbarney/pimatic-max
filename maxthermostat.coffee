@@ -52,7 +52,7 @@ module.exports = (env) ->
       mode:
         description: "the current mode"
         type: "string"
-        enum: ["auto", "manu", "boost"]
+        enum: ["auto", "manual", "boost"]
 
     actions:
       changeModeTo:
@@ -72,9 +72,8 @@ module.exports = (env) ->
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
-
       @_settemperature = @config.actTemp
-      
+
       plugin.mc.on("update", (data) =>
         data = data[@config.deviceNo]
         if data?
@@ -83,8 +82,8 @@ module.exports = (env) ->
           @config.comfyTemp = data.comfortTemperature
           @config.ecoTemp = data.ecoTemperature
           @config.battery = data.battery
-          env.logger.info "got update"
-          env.logger.info data
+          env.logger.debug "got update"
+          env.logger.debug data
         return
       )
       super()
@@ -105,17 +104,14 @@ module.exports = (env) ->
     changeModeTo: (mode) ->
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
-        #TODO: Post data to plugin..not working now!
         plugin.mc.setTemperature @config.deviceNo, mode, 20 
-        _setMode(mode)
+        @_setMode(mode)
         return mode
       )
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
-        # mode: auto, manual, boost
-        #TODO: Post data to plugin..not working now!
         plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
         @_setTemp(temperature)
         return temperature
