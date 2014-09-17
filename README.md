@@ -23,6 +23,7 @@ Use the debug output in pimatic to find out your roomID & available devices. Cur
 
 Sample debug output:
 
+  ````
   09:04:42.165 [pimatic-max-thermostat] got update
   09:04:42.168 [pimatic-max-thermostat] { type: 'Heating Thermostat',
   09:04:42.168 [pimatic-max-thermostat]>  address: '12345cf', <-- deviceID
@@ -39,7 +40,8 @@ Sample debug output:
   09:04:42.168 [pimatic-max-thermostat]>  setpoint: 17,
   09:04:42.168 [pimatic-max-thermostat]>  battery: 'ok',
   09:04:42.168 [pimatic-max-thermostat]>  mode: 'manu' }
-
+  ````
+  
 Thermostats can be defined by adding them to the `devices` section in the config file.
 Set the `class` attribute to `MaxThermostatDevice`. For example:
 
