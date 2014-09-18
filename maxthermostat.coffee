@@ -15,7 +15,7 @@ module.exports = (env) ->
         @mc.once("connected", resolve)
         @mc.client.once('error', reject)
         return
-      ).timeout(60000).catch( (error) =>
+      ).timeout(60000).catch( (error) ->
         env.logger.error "Error on connecting to max cube: #{error.message}"
         env.logger.debug error.stack
         return
@@ -33,12 +33,10 @@ module.exports = (env) ->
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
-          # mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
+          mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
         else
-          env.logger.warn(
-            "MaxThermostat could not find the mobile-frontend. No gui will be available"
-          )
+          env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
 
 
   plugin = new MaxThermostat
@@ -52,7 +50,7 @@ module.exports = (env) ->
       mode:
         description: "the current mode"
         type: "string"
-        enum: ["auto", "manual", "boost"]
+        enum: ["auto", "manu", "boost"]
 
     actions:
       changeModeTo:
@@ -104,13 +102,13 @@ module.exports = (env) ->
     changeModeTo: (mode) ->
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
-        plugin.mc.setTemperature @config.deviceNo, mode, 20 
+        plugin.mc.setTemperature @config.deviceNo, mode, @config.actTemp 
         @_setMode(mode)
         return mode
       )
 
     changeTemperatureTo: (temperature) ->
-      if @settemperature is temperature then return
+      # if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
         plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
         @_setTemp(temperature)
