@@ -16,11 +16,13 @@ Clone this repository into your pimatic node_modules folder (eg. /home/pi/pimati
 2. 
 You can load the plugin by editing your `config.json` to include (host = Max!Cube IP port=Max!Cube Port (default:62910)):
 
+    ````
     { 
        "plugin": "max-thermostat",
        "host": "192.168.X.X",
        "port": 62910
     }
+    ````
 
 in the `plugins` section.
 
