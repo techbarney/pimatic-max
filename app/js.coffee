@@ -6,6 +6,7 @@ $(document).on( "templateinit", (event) ->
     
     # The value in the input
     inputValue: ko.observable()
+    actTempValue: ko.observable()
 
     constructor: (templData, @device) ->
       super(templData, @device)
@@ -50,6 +51,12 @@ $(document).on( "templateinit", (event) ->
       stAttr = @getAttribute('settemperature')
       stAttr.value.subscribe( (value) =>
         @inputValue(value)
+      )
+
+      # actTemp changes -> update tempValue for the frontend
+      temp = @device.config.actTemp
+      temp.value.subscribe( (value) =>
+        @actTempValue(value)
       )
 
       # input changes -> call changeTemperature
