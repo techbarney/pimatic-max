@@ -11,44 +11,9 @@ $(document).on( "templateinit", (event) ->
     constructor: (templData, @device) ->
       super(templData, @device)
 
-      modeAttr = @getAttribute('mode').value()
-      # todo: do something with mode: maybe highlight the button
-      # console.log @elementAttr
-      # switch modeAttr
-      #    when 'auto'
-      #      @manuButton.removeClass('ui-btn-active')
-      #      @boostButton.removeClass('ui-btn-active')
-      #      @ecoButton.removeClass('ui-btn-active')
-      #      @comfyButton.removeClass('ui-btn-active')
-      #      @autoButton.addClass('ui-btn-active')
-      #    when 'manu'
-      #      @manuButton.addClass('ui-btn-active')
-      #      @boostButton.removeClass('ui-btn-active')
-      #      @ecoButton.removeClass('ui-btn-active')
-      #      @comfyButton.removeClass('ui-btn-active')
-      #      @autoButton.removeClass('ui-btn-active')
-      #    when 'boost'
-      #      @manuButton.removeClass('ui-btn-active')
-      #      @boostButton.addClass('ui-btn-active')
-      #      @ecoButton.removeClass('ui-btn-active')
-      #      @comfyButton.removeClass('ui-btn-active')
-      #      @autoButton.removeClass('ui-btn-active')
-      #      # todo: find a way to implement same behaviour for eco and comfy mode
-      #    when 'eco'
-      #      @manuButton.removeClass('ui-btn-active')
-      #      @boostButton.removeClass('ui-btn-active')
-      #      @ecoButton.addClass('ui-btn-active')
-      #      @comfyButton.removeClass('ui-btn-active')
-      #      @autoButton.removeClass('ui-btn-active')
-      #    when 'comfy'
-      #      @manuButton.removeClass('ui-btn-active')
-      #      @boostButton.removeClass('ui-btn-active')
-      #      @ecoButton.removeClass('ui-btn-active')
-      #      @comfyButton.addClass('ui-btn-active')
-      #      @autoButton.removeClass('ui-btn-active')
-
       # settemperature changes -> update input
       stAttr = @getAttribute('settemperature')
+      @inputValue(stAttr.value())
       stAttr.value.subscribe( (value) =>
         @inputValue(value)
       )
@@ -69,7 +34,7 @@ $(document).on( "templateinit", (event) ->
     afterRender: (elements) ->
       super(elements)
       # find the buttons
-      @elementAttr = @elements
+      #@elementAttr = @elements
       @autoButton = $(elements).find('[name=autoButton]')
       @manuButton = $(elements).find('[name=manuButton]')
       @boostButton = $(elements).find('[name=boostButton]')
@@ -78,6 +43,11 @@ $(document).on( "templateinit", (event) ->
       @vacButton = $(elements).find('[name=vacButton]')
       console.log "Auto Button:"
       console.log @autoButton
+      @updateButtons()
+      @getAttribute('mode').value.subscribe( =>
+        @updateButtons()
+      )
+      return
 
     # define the available actions for the template
     modeAuto: -> @changeModeTo "auto"
@@ -89,6 +59,42 @@ $(document).on( "templateinit", (event) ->
     tempPlus: -> @changeTemperatureTo "#{@device.config.actTemp+0.5}"
     tempMinus: -> @changeTemperatureTo "#{@device.config.actTemp-0.5}"
     setTemp: -> @changeTemperatureTo @temperature # TODO: put real temp in here!
+
+    updateButtons: ->
+      modeAttr = @getAttribute('mode').value()
+      switch modeAttr
+        when 'auto'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.addClass('ui-btn-active')
+        when 'manu'
+          @manuButton.addClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+        when 'boost'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.addClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+         # todo: find a way to implement same behaviour for eco and comfy mode
+        when 'eco'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.addClass('ui-btn-active')
+          @comfyButton.removeClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+        when 'comfy'
+          @manuButton.removeClass('ui-btn-active')
+          @boostButton.removeClass('ui-btn-active')
+          @ecoButton.removeClass('ui-btn-active')
+          @comfyButton.addClass('ui-btn-active')
+          @autoButton.removeClass('ui-btn-active')
+      return
 
     changeModeTo: (mode) ->
       @device.rest.changeModeTo({mode}, global: no)
