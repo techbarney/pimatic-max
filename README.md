@@ -3,10 +3,6 @@ pimatic max thermostat plugin
 Plugin to control the MAX! Thermostat (http://www.eq-3.de)
 
 
-Currently not working for 0.8!
--------------
-
-
 
 Installation
 -------------
