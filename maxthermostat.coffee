@@ -47,6 +47,7 @@ module.exports = (env) ->
       settemperature:
         description: "the temp that should be set"
         type: "number"
+        unit: "°C"
       mode:
         description: "the current mode"
         type: "string"
@@ -66,22 +67,27 @@ module.exports = (env) ->
 
     _mode: "auto"
     _settemperature: null
+    
 
     constructor: (@config) ->
       @id = @config.id
       @name = @config.name
       @_settemperature = @config.actTemp
+      @busy = false
 
       plugin.mc.on("update", (data) =>
         data = data[@config.deviceNo]
         if data?
-          @config.actTemp = data.setpoint
-          @config.mode = data.mode
-          @config.comfyTemp = data.comfortTemperature
-          @config.ecoTemp = data.ecoTemperature
-          @config.battery = data.battery
-          env.logger.debug "got update"
-          env.logger.debug data
+          if @busy isnt true
+            @config.actTemp = data.setpoint
+            @config.mode = data.mode
+            @config.comfyTemp = data.comfortTemperature
+            @config.ecoTemp = data.ecoTemperature
+            @config.battery = data.battery
+            @_setTemp(@config.actTemp)
+            @_setMode(@config.mode)
+            env.logger.debug "got update"
+            env.logger.debug data
         return
       )
       super()
@@ -102,17 +108,29 @@ module.exports = (env) ->
     changeModeTo: (mode) ->
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
+        @busy = true
         plugin.mc.setTemperature @config.deviceNo, mode, @config.actTemp 
         @_setMode(mode)
         return mode
+      #TODO: clearTimeout when button is pressed multiple times!
+      t = setTimeout (=>
+        @busy = false
+        return
+      ), 8000
       )
 
     changeTemperatureTo: (temperature) ->
-      # if @settemperature is temperature then return
+      if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
+        @busy = true
         plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
         @_setTemp(temperature)
         return temperature
+      #TODO: clearTimeout when button is pressed multiple times!
+      t = setTimeout (=>
+        @busy = false
+        return
+      ), 8000
       )
-
+       
   return plugin
