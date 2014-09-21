@@ -73,12 +73,10 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_settemperature = @config.actTemp
-      @busy = false
 
       plugin.mc.on("update", (data) =>
         data = data[@config.deviceNo]
         if data?
-          if @busy isnt true
             @config.actTemp = data.setpoint
             @config.mode = data.mode
             @config.comfyTemp = data.comfortTemperature
@@ -108,30 +106,18 @@ module.exports = (env) ->
     changeModeTo: (mode) ->
       return plugin.afterConnect.then( =>
         # mode: auto, manual, boost
-        #@busy = true
         plugin.mc.setTemperature @config.deviceNo, mode, @config.actTemp 
         @_setMode(mode)
         return mode
-      #TODO: clearTimeout when button is pressed multiple times!
-      t = setTimeout (=>
-        @busy = false
-        return
-      ), 8000
       )
 
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
-        #@busy = true
         env.logger.debug "temp is going to change"
         plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
         @_setTemp(temperature)
         return temperature
-      #TODO: clearTimeout when button is pressed multiple times!
-      t = setTimeout (=>
-        @busy = false
-        return
-      ), 8000
       )
        
   return plugin
