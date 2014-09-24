@@ -75,6 +75,8 @@ module.exports = (env) ->
       @_settemperature = @config.actTemp
 
       plugin.mc.on("update", (data) =>
+        env.logger.debug "got update"
+        env.logger.debug data
         data = data[@config.deviceNo]
         if data?
             @config.actTemp = data.setpoint
@@ -84,8 +86,6 @@ module.exports = (env) ->
             @config.battery = data.battery
             @_setTemp(@config.actTemp)
             @_setMode(@config.mode)
-            env.logger.debug "got update"
-            env.logger.debug data
         return
       )
       super()
