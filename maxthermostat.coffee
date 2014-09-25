@@ -11,6 +11,7 @@ module.exports = (env) ->
 
       # Promise that is resolved when the connection is established
       @afterConnect = new Promise( (resolve, reject) =>
+        env.logger.debug "Remember to fill config with dummy values to get debug output!"
         @mc = new MaxCube(plugin.config.host, plugin.config.port)
         @mc.once("connected", resolve)
         @mc.client.once('error', reject)
@@ -67,7 +68,6 @@ module.exports = (env) ->
 
     _mode: "auto"
     _settemperature: null
-    
 
     constructor: (@config) ->
       @id = @config.id
