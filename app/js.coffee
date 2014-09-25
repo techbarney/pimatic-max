@@ -11,10 +11,10 @@ $(document).on( "templateinit", (event) ->
       super(templData, @device)
       
       # collect input and only send once
-      @delayedInputValue = ko.pureComputed(@inputValue)
-      .extend(rateLimit: 
-        method: "notifyWhenChangesStop", 
-        timeout: 500)
+      # @delayedInputValue = ko.pureComputed(@inputValue)
+      # .extend(rateLimit: 
+      #   method: "notifyWhenChangesStop", 
+      #   timeout: 500)
 
       # settemperature changes -> update input + also update buttons if needed
       @stAttr = @getAttribute('settemperature')
@@ -25,7 +25,7 @@ $(document).on( "templateinit", (event) ->
       )
 
       # input changes -> call changeTemperature
-      @delayedInputValue.subscribe( (textValue) =>
+      @inputValue.subscribe( (textValue) =>
         if parseFloat(@stAttr.value()) isnt parseFloat(textValue)
           env.logger.info "new changeTemperature arrived"
           @changeTemperatureTo(parseFloat(textValue))
