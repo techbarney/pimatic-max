@@ -20,7 +20,7 @@ You can load the plugin by editing your `config.json` to include (host = Max!Cub
     }
     ````
 
-in the `plugins` section.
+in the `plugins` section. Also you will need to create a dummy device (explained further down) to get the debug output! This step is important!
 
 3.
 Also you'll need to install the connector software "max-control" written by https://github.com/aslansky
