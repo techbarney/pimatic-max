@@ -4,10 +4,13 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   _ = env.require 'lodash'
   MaxCube = require 'max-control'
+  M = env.matcher
   
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
+
+      @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
 
       # Promise that is resolved when the connection is established
       @afterConnect = new Promise( (resolve, reject) =>
@@ -120,4 +123,96 @@ module.exports = (env) ->
         return temperature
       )
        
+
+  class MaxModeActionProvider extends env.actions.ActionProvider
+
+    constructor: (@framework) -> 
+    # ### executeAction()
+    ###
+    This function handles action in the form of `set mode to "some mode"`
+    ###
+    parseAction: (input, context) =>
+      retVal = null
+      modeTokens = null
+      fullMatch = no
+
+      setMode = (m, tokens) => modeTokens = tokens
+      onEnd = => fullMatch = yes
+      
+      m = M(input, context)
+        .match("set mode to ")
+        .matchStringWithVars(setMode)
+      
+      if m.hadMatch()
+        match = m.getFullMatch()
+        return {
+          token: match
+          nextInput: input.substring(match.length)
+          actionHandler: new MaxModeActionHandler(@framework, modeTokens)
+        }
+      else
+        return null
+
+
+  class MaxModeActionHandler extends env.actions.ActionHandler
+
+    constructor: (@framework, @modeTokens, @config) ->
+    # ### executeAction()
+    ###
+    This function handles action in the form of `set mode to "some mode"`
+    ###
+    executeAction: (simulate) =>
+      @framework.variableManager.evaluateStringExpression(@modeTokens).then( (command) =>
+        if simulate
+          # just return a promise fulfilled with a description about what we would do.
+          return __("would set mode to \"%s\"", command)
+        else
+          return __("TODO: define actual action: ", command)
+      )
+
+  class MaxTempActionProvider extends env.actions.ActionProvider
+
+    constructor: (@framework) -> 
+    # ### executeAction()
+    ###
+    This function handles action in the form of `set temp to "some temp"`
+    ###
+    parseAction: (input, context) =>
+      retVal = null
+      tempTokens = null
+      fullMatch = no
+
+      setTemp = (m_, tokens) => tempTokens = tokens
+      onEnd = => fullMatch = yes
+      
+      m_ = M(input, context)
+        .match("set temp to ")
+        .matchStringWithVars(setMode)
+      
+      if m.hadMatch()
+        match = m.getFullMatch()
+        return {
+          token: match
+          nextInput: input.substring(match.length)
+          actionHandler: new MaxTempActionHandler(@framework, tempTokens)
+        }
+      else
+        return null
+
+
+  class MaxTempActionHandler extends env.actions.ActionHandler
+
+    constructor: (@framework, @tempTokens, @config) ->
+    # ### executeAction()
+    ###
+    This function handles action in the form of `set temp to "some temp"`
+    ###
+    executeAction: (simulate) =>
+      @framework.variableManager.evaluateStringExpression(@tempTokens).then( (command) =>
+        if simulate
+          # just return a promise fulfilled with a description about what we would do.
+          return __("would set temp to \"%s\"", command)
+        else
+          return __("TODO: define actual action:", command)
+      )
   return plugin
