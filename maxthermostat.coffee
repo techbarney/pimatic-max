@@ -82,13 +82,13 @@ module.exports = (env) ->
         env.logger.debug data
         data = data[@config.deviceNo]
         if data?
-            @config.actTemp = data.setpoint
-            @config.mode = data.mode
-            @config.comfyTemp = data.comfortTemperature
-            @config.ecoTemp = data.ecoTemperature
-            @config.battery = data.battery
-            @_setTemp(@config.actTemp)
-            @_setMode(@config.mode)
+          @config.actTemp = data.setpoint
+          @config.mode = data.mode
+          # @config.comfyTemp = data.comfortTemperature // Doesn't make sense
+          # @config.ecoTemp = data.ecoTemperature // you'll define these in the pimatic config
+          @config.battery = data.battery
+          @_setTemp(@config.actTemp)
+          @_setMode(@config.mode)
         return
       )
       super()
@@ -122,51 +122,187 @@ module.exports = (env) ->
         @_setTemp(temperature)
         return temperature
       )
-       
+
 
   class MaxModeActionProvider extends env.actions.ActionProvider
 
-    constructor: (@framework) -> 
-    # ### executeAction()
+    constructor: (@framework) ->
+
+    # ### parseAction()
     ###
-    This function handles action in the form of `set mode to "some mode"`
+    Parses the above actions.
     ###
     parseAction: (input, context) =>
-      retVal = null
-      modeTokens = null
-      fullMatch = no
+      # The result the function will return:
+      retVar = null
 
-      setMode = (m, tokens) => modeTokens = tokens
-      onEnd = => fullMatch = yes
-      
-      m = M(input, context)
-        .match("set mode to ")
-        .matchStringWithVars(setMode)
-      
-      if m.hadMatch()
-        match = m.getFullMatch()
+      thermostats = _(@framework.deviceManager.devices).values().filter( 
+        (device) => device.hasAction("changeModeTo") 
+      ).value()
+
+      if thermostats.length is 0 then return
+
+      device = null
+      valueTokens = null
+      match = null
+
+      # Try to match the input string with:
+      M(input, context)
+        .match('set mode of ')
+        .matchDevice(thermostats, (next, d) =>
+          next.match(' to ')
+            .matchStringWithVars( (next, ts) =>
+              m = next.match(' mode', optional: yes)
+              if device? and device.id isnt d.id
+                context?.addError(""""#{input.trim()}" is ambiguous.""")
+                return
+              device = d
+              valueTokens = ts
+              match = m.getFullMatch()
+            )
+        )
+
+      if match?
+        if valueTokens.length is 1 and not isNaN(valueTokens[0])
+          value = valueTokens[0] 
+          assert(not isNaN(value))
+          modes = ["eco", "boost", "auto", "manu", "comfy"] # TODO: Implement eco & comfy in changeModeTo method!
+          if modes.indexOf(value) < -1
+            context?.addError("Allowed modes: eco,boost,auto,manu,comfy")
+            return
         return {
           token: match
           nextInput: input.substring(match.length)
-          actionHandler: new MaxModeActionHandler(@framework, modeTokens)
+          actionHandler: new MaxModeActionHandler(@framework, device, valueTokens)
         }
-      else
+      else 
         return null
 
 
   class MaxModeActionHandler extends env.actions.ActionHandler
 
-    constructor: (@framework, @modeTokens, @config) ->
-    # ### executeAction()
+    constructor: (@framework, @device, @valueTokens) ->
+      assert @device?
+      assert @valueTokens?
+
     ###
-    This function handles action in the form of `set mode to "some mode"`
+    Handles the above actions.
     ###
-    executeAction: (simulate) =>
-      @framework.variableManager.evaluateStringExpression(@modeTokens).then( (command) =>
+    _doExecuteAction: (simulate, value) =>
+      return (
         if simulate
-          # just return a promise fulfilled with a description about what we would do.
-          return __("would set mode to \"%s\"", command)
+          __("would set mode %s to %s%%", @device.name, value)
         else
-          return __("TODO: define actual action: ", command)
+          @device.changeModeTo(value).then( => __("set mode %s to %s%%", @device.name, value) )
       )
+
+    # ### executeAction()
+    executeAction: (simulate) => 
+      @framework.variableManager.evaluateStringExpression(@valueTokens).then( (value) =>
+        @lastValue = value
+        return @_doExecuteAction(simulate, value)
+      )
+
+    # ### hasRestoreAction()
+    hasRestoreAction: -> yes
+    # ### executeRestoreAction()
+    executeRestoreAction: (simulate) => Promise.resolve(@_doExecuteAction(simulate, @lastValue))
+
+
+
+  class MaxTempActionProvider extends env.actions.ActionProvider
+
+    constructor: (@framework) ->
+
+    # ### parseAction()
+    ###
+    Parses the above actions.
+    ###
+    parseAction: (input, context) =>
+      # The result the function will return:
+      retVar = null
+
+      thermostats = _(@framework.deviceManager.devices).values().filter( 
+        (device) => device.hasAction("changeTemperatureTo") 
+      ).value()
+
+      if thermostats.length is 0 then return
+
+      device = null
+      valueTokens = null
+      match = null
+
+      # Try to match the input string with:
+      M(input, context)
+        .match('set temp of ')
+        .matchDevice(thermostats, (next, d) =>
+          next.match(' to ')
+            .matchNumericExpression( (next, ts) =>
+              m = next.match('°C', optional: yes)
+              if device? and device.id isnt d.id
+                context?.addError(""""#{input.trim()}" is ambiguous.""")
+                return
+              device = d
+              valueTokens = ts
+              match = m.getFullMatch()
+            )
+        )
+
+      if match?
+        if valueTokens.length is 1 and not isNaN(valueTokens[0])
+          value = valueTokens[0] 
+          assert(not isNaN(value))
+          value = parseFloat(value)
+          if value < 0.0
+            context?.addError("Can't set temp to a negativ value.")
+            return
+          if value > 32.0
+            context?.addError("Can't set temp higher than 32°C.")
+            return
+        return {
+          token: match
+          nextInput: input.substring(match.length)
+          actionHandler: new MaxTempActionHandler(@framework, device, valueTokens)
+        }
+      else 
+        return null
+
+  class MaxTempActionHandler extends env.actions.ActionHandler
+
+    constructor: (@framework, @device, @valueTokens) ->
+      assert @device?
+      assert @valueTokens?
+
+    # _clampVal: (value) ->
+    #   assert(not isNaN(value))
+    #   return (switch
+    #     when value > 32 then 32
+    #     when value < 0 then 0
+    #     else value
+    #   )
+
+    ###
+    Handles the above actions.
+    ###
+    _doExecuteAction: (simulate, value) =>
+      return (
+        if simulate
+          __("would set temp of %s to %s%%", @device.name, value)
+        else
+          @device.changeTemperatureTo(value).then( => __("set temp of %s to %s%%", @device.name, value) )
+      )
+
+    # ### executeAction()
+    executeAction: (simulate) => 
+      @framework.variableManager.evaluateNumericExpression(@valueTokens).then( (value) =>
+        # value = @_clampVal value
+        @lastValue = value
+        return @_doExecuteAction(simulate, value)
+      )
+
+    # ### hasRestoreAction()
+    hasRestoreAction: -> yes
+    # ### executeRestoreAction()
+    executeRestoreAction: (simulate) => Promise.resolve(@_doExecuteAction(simulate, @lastValue))
+
   return plugin
