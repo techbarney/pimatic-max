@@ -9,7 +9,7 @@ $(document).on( "templateinit", (event) ->
 
     constructor: (templData, @device) ->
       super(templData, @device)
-      
+      console.log device.config
       # collect input and only send once
       # @delayedInputValue = ko.pureComputed(@inputValue)
       # .extend(rateLimit: 
@@ -19,17 +19,20 @@ $(document).on( "templateinit", (event) ->
       # settemperature changes -> update input + also update buttons if needed
       @stAttr = @getAttribute('settemperature')
       @inputValue(@stAttr.value())
+
+      attrValue = @stAttr.value()
       @stAttr.value.subscribe( (value) =>
         @inputValue(value)
         @updatePreTemperature()
+        attrValue = value
       )
 
       # input changes -> call changeTemperature
-      @inputValue.subscribe( (textValue) =>
-        if parseFloat(@stAttr.value()) isnt parseFloat(textValue)
-          env.logger.info "new changeTemperature arrived"
+      ko.computed( =>
+        textValue = @inputValue()
+        if parseFloat(attrValue) isnt parseFloat(textValue)
           @changeTemperatureTo(parseFloat(textValue))
-      )
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } });
 
       # Do something, after create: console.log(this)
     afterRender: (elements) ->
@@ -41,6 +44,9 @@ $(document).on( "templateinit", (event) ->
       @ecoButton = $(elements).find('[name=ecoButton]')
       @comfyButton = $(elements).find('[name=comfyButton]')
       @vacButton = $(elements).find('[name=vacButton]')
+      @input = $(elements).find('.spinbox input')
+
+      @input.spinbox()
 
       @updateButtons()
       @updatePreTemperature()
@@ -58,8 +64,6 @@ $(document).on( "templateinit", (event) ->
     modeEco: -> @changeTemperatureTo "#{@device.config.ecoTemp}"
     modeComfy: -> @changeTemperatureTo "#{@device.config.comfyTemp}"
     modeVac: -> @changeTemperatureTo "#{@device.config.vacTemp}"
-    tempPlus: -> @changeTemperatureTo "#{@stAttr.value()+0.5}"
-    tempMinus: -> @changeTemperatureTo "#{@stAttr.value()-0.5}"
     setTemp: -> @changeTemperatureTo "#{@inputValue.value()}"
 
     updateButtons: ->
@@ -103,9 +107,17 @@ $(document).on( "templateinit", (event) ->
         .fail(ajaxAlertFail)
 
     changeTemperatureTo: (settemperature) ->
+      @input.spinbox('disable')
       @device.rest.changeTemperatureTo({settemperature}, global: no)
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
+        .always( => @input.spinbox('enable') )
+
+    getConfig: (name) ->
+      if @device.config[name]?
+        return @device.config[name]
+      else
+        return @device.configDefaults[name]
       
   # register the item-class
   pimatic.templateClasses['MaxThermostatDevice'] = MaxThermostatDeviceItem

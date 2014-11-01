@@ -1,40 +1,29 @@
 <script id="MaxThermostatDevice-template" type="text/template">
   <li class="sortable device no-header maxthermodevice">
     <label data-bind="text: name" class="device-label"></label>
-      <div data-role="controlgroup" data-type="horizontal" data-mini="true" data-enhanced="true" class="button-control ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
-        <div class="ui-controlgroup-controls">
-          <a class="ui-first-child ui-btn ui-corner-all" name="ecoButton" data-bind="click: modeEco">eco</a>
-          <a class="ui-last-child ui-btn ui-corner-all" name="comfyButton" data-bind="click: modeComfy">comfy</a>
-      </div>
-    </div>
-  </li>
-  <li class="sortable device no-header maxthermodevice">
-    <label data-bind="text: name" class="device-label"></label>
-      <div data-role="controlgroup" data-type="horizontal" data-mini="true" data-enhanced="true" class="button-control ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
-        <div class="ui-controlgroup-controls">
-          <a class="ui-first-child ui-btn ui-corner-all" name="autoButton" data-bind="click: modeAuto">auto</a>
-          <a class="ui-btn ui-corner-all" name="manuButton" data-bind="click: modeManu">manu</a>
-          <a class="ui-btn ui-corner-all" name="boostButton" data-bind="click: modeBoost">boost</a>
-          <a class="ui-btn ui-corner-all" name="ecoButton" data-bind="click: modeEco">eco</a>
-          <a class="ui-last-child ui-btn ui-corner-all" name="comfyButton" data-bind="click: modeComfy">comfy</a>
-      </div>
-    </div>
-  </li>
-  <li class="sortable device no-header item ui-li-static ui-body-inherit">
-        <div class="handle no-carousel-slide">
-        <div class="ui-btn-icon-notext ui-icon ui-icon-bars ui-alt-icon ui-nodisc-icon"></div>
-      </div>
-      <label data-bind="text: name" class="device-label">Temperatur</label> 
-      <span data-bind="text: ($data.error() ? $data.error() : &#39;&#39;) " class="error"></span> 
-      <span data-bind="template: { name: &#39;attribute-template&#39;, foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }" class="attributes contains-attr-temperature contains-attr-type-number contains-attr-humidity"><span class="attribute attr-temperature attr-type-number"><span data-bind="text: $data.valueText" class="val"></span><span data-bind="text: $data.unitText" class="unit"></span><!-- ko if: $data.showLastUpdate()  --><!-- /ko -->
-        <!-- ko if: $data.showSparkline()  --><span data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}" class="sparkline"><canvas width="27" height="17" style="display: inline-block; width: 27px; height: 17px; vertical-align: top;"></canvas></span><!-- /ko --></span></span>
-  </li>
-  <li class="sortable shutter-device no-header">
-        <label data-bind="text: name" class="device-label"></label> 
-        <div data-role="controlgroup" data-type="horizontal" data-mini="true" data-enhanced="true" class="shutter-buttons ui-mini ui-controlgroup ui-controlgroup-horizontal ui-corner-all">
+      <div class="controls">
+        <!-- ko if: $data.getConfig('guiShowModeControl')  -->
+        <div data-role="controlgroup" data-type="horizontal" data-mini="true" data-enhanced="true" class="button-control ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
           <div class="ui-controlgroup-controls">
-          <a data-bind="click: tempMinus" class="ui-first-child ui-btn ui-corner-all ui-icon-arrow-d ui-btn-icon-left">Down</a>
-          <a data-bind="click: tempPlus" class="ui-last-child ui-btn ui-corner-all ui-icon-arrow-u ui-btn-icon-left">Up</a></div>
+            <a class="ui-first-child ui-btn ui-corner-all" name="autoButton" data-bind="click: modeAuto">auto</a>
+            <a class="ui-btn ui-corner-all" name="manuButton" data-bind="click: modeManu">manu</a>
+            <a class="ui-last-child ui-btn ui-corner-all" name="boostButton" data-bind="click: modeBoost">boost</a>
+          </div>
         </div>
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowPresetControl')  -->
+        <div data-role="controlgroup" data-type="horizontal" data-mini="true" data-enhanced="true" class="button-control ui-controlgroup ui-controlgroup-horizontal ui-corner-all ui-mini">
+          <div class="ui-controlgroup-controls">
+            <a class="ui-first-child ui-btn ui-corner-all" name="ecoButton" data-bind="click: modeEco">eco</a>
+            <a class="ui-last-child ui-btn ui-corner-all" name="comfyButton" data-bind="click: modeComfy">comfy</a>
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowTemperatueInput') -->
+        <div class="spinbox">
+          <input type="text" data-role="spinbox" name="spin" id="spin" value="0" min="0" max="100" data-mini="true" step="1" data-bind="textInput: inputValue" />
+        </div>
+        <!-- /ko -->
+      </div>
   </li>
 </script>

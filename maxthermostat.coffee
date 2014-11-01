@@ -36,6 +36,7 @@ module.exports = (env) ->
         # Check if the mobile-frontent was loaded and get a instance
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
+          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/jqm-spinbox.js"
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
           mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
@@ -119,10 +120,26 @@ module.exports = (env) ->
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
-        env.logger.debug "temp is going to change"
-        plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
-        @_setTemp(temperature)
-        return temperature
+        return new Promise( (resolve, reject) =>
+          env.logger.debug "temp is going to change"
+          plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
+          # wait for response from the cube
+          client = plugin.mc.client
+          # resolve when right value was received
+          changeListener = ( (value) =>
+            resolve() if parseFloat(value) is parseFloat(temperature)
+            @removeListener('settemperature', changeListener)
+            client.removeListener('error', errorListener)
+          )
+          # on error reject
+          errorListener = ( (error) =>
+            @removeListener('settemperature', changeListener)
+            reject(error)
+          )
+          # wait for 
+          @on('settemperature', changeListener)
+          client.once('error', errorListener)
+        )
       )
 
 

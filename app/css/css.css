@@ -1,35 +1,33 @@
-.maxthermodevice .button-control {
-  display: inline-block;
-  float: right;
-  max-width: 100%;
-  margin: 0;
-}
 
-.maxthermodevice .temperature{
-  display: inline-block;
-  float: right;
-  max-width: 100%;
-  margin: 0;
-}
-
-input[type="number"] {
-   width:50px;
-}
-
-#index li.maxthermodevice .shutter-buttons {
-  float: right;
-  max-width: 100%;
-  margin: 0;
-  display: inline-block;
-}
-
+/*
 .ui-btn-inline {
   display: inline-block;
   vertical-align: middle;
   margin-right: .625em;
-}
+}*/
 
 .maxthermodevice .unit {
   color: #888888;
   margin-left: 0.1em;
+}
+#index li.maxthermodevice div.controls {
+  float: right;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  margin-top: -4px;
+  margin-bottom: -4px;
+}
+
+#index li.maxthermodevice div.controls .ui-controlgroup{
+  display: inline-block;
+  margin: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+#index li.maxthermodevice div.controls .spinbox input{
+  border: none;
+  height: 28px;
 }
