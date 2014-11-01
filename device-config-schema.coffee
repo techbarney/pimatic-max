@@ -29,12 +29,12 @@ module.exports = {
         type: "number"
         default: 21
       mode: 
-        description: "The mode of the thermostat (auto/manual/boost)"
+        description: "The mode of the thermostat (auto/manu/boost)"
         type: "string"
         default: "auto" 
       battery: 
         description: "The battery status"
         type: "string"
-        default: "" 
+        default: "ok" 
   }
 }

@@ -3,10 +3,6 @@ pimatic max thermostat plugin
 Plugin to control the MAX! Thermostat (http://www.eq-3.de)
 
 
-Currently not working for 0.8!
--------------
-
-
 
 Installation
 -------------
@@ -16,13 +12,15 @@ Clone this repository into your pimatic node_modules folder (eg. /home/pi/pimati
 2. 
 You can load the plugin by editing your `config.json` to include (host = Max!Cube IP port=Max!Cube Port (default:62910)):
 
+    ````
     { 
        "plugin": "max-thermostat",
        "host": "192.168.X.X",
        "port": 62910
     }
+    ````
 
-in the `plugins` section.
+in the `plugins` section. Also you will need to create a dummy device (explained further down) to get the debug output! This step is important!
 
 3.
 Also you'll need to install the connector software "max-control" written by https://github.com/aslansky
@@ -70,3 +68,8 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
       "mode": "auto",
       "battery": ""
     }
+
+Screenshot
+-------------
+[![Screenshot 1][screen1_thumb]](https://cloud.githubusercontent.com/assets/6489464/4346733/d30e7710-4110-11e4-87a7-934770234a84.PNG) 
+[screen1_thumb]: https://cloud.githubusercontent.com/assets/6489464/4346733/d30e7710-4110-11e4-87a7-934770234a84.PNG

@@ -9,17 +9,25 @@ $(document).on( "templateinit", (event) ->
 
     constructor: (templData, @device) ->
       super(templData, @device)
+      
+      # collect input and only send once
+      # @delayedInputValue = ko.pureComputed(@inputValue)
+      # .extend(rateLimit: 
+      #   method: "notifyWhenChangesStop", 
+      #   timeout: 500)
 
-      # settemperature changes -> update input
-      stAttr = @getAttribute('settemperature')
-      @inputValue(stAttr.value())
-      stAttr.value.subscribe( (value) =>
+      # settemperature changes -> update input + also update buttons if needed
+      @stAttr = @getAttribute('settemperature')
+      @inputValue(@stAttr.value())
+      @stAttr.value.subscribe( (value) =>
         @inputValue(value)
+        @updatePreTemperature()
       )
 
       # input changes -> call changeTemperature
       @inputValue.subscribe( (textValue) =>
-        if parseFloat(stAttr.value()) isnt parseFloat(textValue)
+        if parseFloat(@stAttr.value()) isnt parseFloat(textValue)
+          env.logger.info "new changeTemperature arrived"
           @changeTemperatureTo(parseFloat(textValue))
       )
 
@@ -27,19 +35,20 @@ $(document).on( "templateinit", (event) ->
     afterRender: (elements) ->
       super(elements)
       # find the buttons
-      #@elementAttr = @elements
       @autoButton = $(elements).find('[name=autoButton]')
       @manuButton = $(elements).find('[name=manuButton]')
       @boostButton = $(elements).find('[name=boostButton]')
       @ecoButton = $(elements).find('[name=ecoButton]')
       @comfyButton = $(elements).find('[name=comfyButton]')
       @vacButton = $(elements).find('[name=vacButton]')
-      console.log "Auto Button:"
-      console.log @autoButton
+
       @updateButtons()
+      @updatePreTemperature()
+
       @getAttribute('mode').value.subscribe( =>
         @updateButtons()
       )
+
       return
 
     # define the available actions for the template
@@ -49,9 +58,9 @@ $(document).on( "templateinit", (event) ->
     modeEco: -> @changeTemperatureTo "#{@device.config.ecoTemp}"
     modeComfy: -> @changeTemperatureTo "#{@device.config.comfyTemp}"
     modeVac: -> @changeTemperatureTo "#{@device.config.vacTemp}"
-    tempPlus: -> @changeTemperatureTo "#{@device.config.actTemp+0.5}"
-    tempMinus: -> @changeTemperatureTo "#{@device.config.actTemp-0.5}"
-    setTemp: -> @changeTemperatureTo @temperature # TODO: put real temp in here!
+    tempPlus: -> @changeTemperatureTo "#{@stAttr.value()+0.5}"
+    tempMinus: -> @changeTemperatureTo "#{@stAttr.value()-0.5}"
+    setTemp: -> @changeTemperatureTo "#{@inputValue.value()}"
 
     updateButtons: ->
       modeAttr = @getAttribute('mode').value()
@@ -59,14 +68,10 @@ $(document).on( "templateinit", (event) ->
         when 'auto'
           @manuButton.removeClass('ui-btn-active')
           @boostButton.removeClass('ui-btn-active')
-          @ecoButton.removeClass('ui-btn-active')
-          @comfyButton.removeClass('ui-btn-active')
           @autoButton.addClass('ui-btn-active')
         when 'manu'
           @manuButton.addClass('ui-btn-active')
           @boostButton.removeClass('ui-btn-active')
-          @ecoButton.removeClass('ui-btn-active')
-          @comfyButton.removeClass('ui-btn-active')
           @autoButton.removeClass('ui-btn-active')
         when 'boost'
           @manuButton.removeClass('ui-btn-active')
@@ -74,19 +79,22 @@ $(document).on( "templateinit", (event) ->
           @ecoButton.removeClass('ui-btn-active')
           @comfyButton.removeClass('ui-btn-active')
           @autoButton.removeClass('ui-btn-active')
-         # todo: find a way to implement same behaviour for eco and comfy mode
-        when 'eco'
-          @manuButton.removeClass('ui-btn-active')
-          @boostButton.removeClass('ui-btn-active')
-          @ecoButton.addClass('ui-btn-active')
-          @comfyButton.removeClass('ui-btn-active')
-          @autoButton.removeClass('ui-btn-active')
-        when 'comfy'
-          @manuButton.removeClass('ui-btn-active')
-          @boostButton.removeClass('ui-btn-active')
-          @ecoButton.removeClass('ui-btn-active')
-          @comfyButton.addClass('ui-btn-active')
-          @autoButton.removeClass('ui-btn-active')
+      return
+
+    updatePreTemperature: ->
+      if parseFloat(@stAttr.value()) is parseFloat("#{@device.config.ecoTemp}")
+        console.log "eco"
+        console.log parseFloat("#{@device.config.ecoTemp}")
+        @boostButton.removeClass('ui-btn-active')
+        @ecoButton.addClass('ui-btn-active')
+        @comfyButton.removeClass('ui-btn-active')
+      else if parseFloat(@stAttr.value()) is parseFloat("#{@device.config.comfyTemp}")
+        @boostButton.removeClass('ui-btn-active')
+        @ecoButton.removeClass('ui-btn-active')
+        @comfyButton.addClass('ui-btn-active')
+      else
+        @ecoButton.removeClass('ui-btn-active')
+        @comfyButton.removeClass('ui-btn-active')
       return
 
     changeModeTo: (mode) ->

@@ -1,4 +1,12 @@
 .maxthermodevice .button-control {
+  display: inline-block;
+  float: right;
+  max-width: 100%;
+  margin: 0;
+}
+
+.maxthermodevice .temperature{
+  display: inline-block;
   float: right;
   max-width: 100%;
   margin: 0;
@@ -8,33 +16,20 @@ input[type="number"] {
    width:50px;
 }
 
-.rpicam-device .rpicam-preview-thumb {
-  margin-top: -1px;
-  width: 34px;
-  height: 34px;
+#index li.maxthermodevice .shutter-buttons {
+  float: right;
+  max-width: 100%;
+  margin: 0;
   display: inline-block;
 }
 
-.rpicam-device .preview-info {
-  margin: 5px 10px 5px 0 !important;
-  position: absolute;
-  right: 0;
-  top: 0;
+.ui-btn-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: .625em;
 }
 
-.rpicam-device .preview-info span{
-  position: relative;
-  top: -11px;
-  right: 10px;
-}
-
-#rpicam-full-previce-img {
-  width: 100%;
-  max-width: 512px;
-  margin:0px auto;
-}
-
-.rpicam-crontrols, .rpicam-full-previw {
-  width: 100%;
-  text-align: center;
+.maxthermodevice .unit {
+  color: #888888;
+  margin-left: 0.1em;
 }
