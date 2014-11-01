@@ -4,6 +4,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   _ = env.require 'lodash'
   MaxCube = require 'max-control'
+  Promise.promisifyAll(MaxCube.prototype)
   M = env.matcher
   
   class MaxThermostat extends env.plugins.Plugin
@@ -120,26 +121,8 @@ module.exports = (env) ->
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
       return plugin.afterConnect.then( =>
-        return new Promise( (resolve, reject) =>
-          env.logger.debug "temp is going to change"
-          plugin.mc.setTemperature @config.deviceNo, @config.mode, temperature  
-          # wait for response from the cube
-          client = plugin.mc.client
-          # resolve when right value was received
-          changeListener = ( (value) =>
-            resolve() if parseFloat(value) is parseFloat(temperature)
-            @removeListener('settemperature', changeListener)
-            client.removeListener('error', errorListener)
-          )
-          # on error reject
-          errorListener = ( (error) =>
-            @removeListener('settemperature', changeListener)
-            reject(error)
-          )
-          # wait for 
-          @on('settemperature', changeListener)
-          client.once('error', errorListener)
-        )
+        env.logger.debug "temp is going to change"
+        return plugin.mc.setTemperatureAsync(@config.deviceNo, @config.mode, temperature)
       )
 
 

@@ -16,7 +16,7 @@
     "url": "git://github.com/georg90/pimatic-max-thermostat.git"
   },
   "dependencies": {
-    "max-control": "git+https://github.com/georg90/max-control"
+    "max-control": "git+https://github.com/sweetpi/max-control"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"
