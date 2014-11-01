@@ -14,7 +14,7 @@
 			step: false,
 			theme: false,
 			mini: null,
-			repButton: true,
+			repButton: false,
 			version: "1.4.4-2014091500",
 			initSelector: "input[data-role='spinbox']",
 			clickEvent: "vclick",
@@ -40,12 +40,12 @@
 				
 			if ( !w.disabled ) {
 				if ( direction < 1 ) {
-					tmp = parseInt( w.d.input.val(), 10 ) - o.step;
+					tmp = parseFloat( w.d.input.val()) - o.step;
 					if ( tmp >= o.dmin ) { 
 						w.d.input.val( tmp ).trigger( "change" );
 					}
 				} else {
-					tmp = parseInt( w.d.input.val(), 10 ) + o.step;
+					tmp = parseFloat( w.d.input.val()) + o.step;
 					if ( tmp <= o.dmax ) { 
 						w.d.input.val( tmp ).trigger( "change" );
 					}
@@ -92,17 +92,17 @@
 			
 			if ( o.dmin === false ) { 
 				o.dmin = ( typeof w.d.input.attr( "min" ) !== "undefined" ) ?
-					parseInt( w.d.input.attr( "min" ), 10 ) :
+					parseFloat( w.d.input.attr( "min" ) ) :
 					Number.MAX_VALUE * -1;
 			}
 			if ( o.dmax === false ) { 
 				o.dmax = ( typeof w.d.input.attr( "max" ) !== "undefined" ) ?
-					parseInt(w.d.input.attr( "max" ), 10 ) :
+					parseFloat(w.d.input.attr( "max" )) :
 					Number.MAX_VALUE;
 			}
 			if ( o.step === false) {
 				o.step = ( typeof w.d.input.attr( "step") !== "undefined" ) ?
-					parseInt( w.d.input.attr( "step" ), 10 ) :
+					parseFloat( w.d.input.attr( "step" ) ) :
 					1;
 				}
 			
