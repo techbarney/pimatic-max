@@ -185,7 +185,8 @@ module.exports = (env) ->
         if valueTokens.length is 1 and not isNaN(valueTokens[0])
           value = valueTokens[0] 
           assert(not isNaN(value))
-          modes = ["eco", "boost", "auto", "manu", "comfy"] # TODO: Implement eco & comfy in changeModeTo method!
+          modes = ["eco", "boost", "auto", "manu", "comfy"] 
+          # TODO: Implement eco & comfy in changeModeTo method!
           if modes.indexOf(value) < -1
             context?.addError("Allowed modes: eco,boost,auto,manu,comfy")
             return
@@ -308,7 +309,9 @@ module.exports = (env) ->
         if simulate
           __("would set temp of %s to %s%%", @device.name, value)
         else
-          @device.changeTemperatureTo(value).then( => __("set temp of %s to %s%%", @device.name, value) )
+          @device.changeTemperatureTo(value).then( => 
+            __("set temp of %s to %s%%", @device.name, value) 
+          )
       )
 
     # ### executeAction()
