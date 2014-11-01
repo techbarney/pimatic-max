@@ -36,7 +36,9 @@ module.exports = (env) ->
           mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
         else
-          env.logger.warn "MaxThermostat could not find the mobile-frontend. No gui will be available"
+          env.logger.warn(
+            "MaxThermostat could not find the mobile-frontend. No gui will be available"
+          )
 
 
   plugin = new MaxThermostat
