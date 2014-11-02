@@ -14,7 +14,7 @@
 			step: false,
 			theme: false,
 			mini: null,
-			repButton: false,
+			repButton: true,
 			version: "1.4.4-2014091500",
 			initSelector: "input[data-role='spinbox']",
 			clickEvent: "vclick",
