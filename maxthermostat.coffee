@@ -32,6 +32,11 @@ module.exports = (env) ->
         createCallback: (config) -> new MaxThermostatDevice(config)
       })
 
+      @framework.deviceManager.registerDeviceClass("MaxContactSensor", {
+        configDef: deviceConfigDef.MaxContactSensor,
+        createCallback: (config) -> new MaxContactSensor(config)
+      })
+
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
@@ -124,6 +129,23 @@ module.exports = (env) ->
         env.logger.debug "temp is going to change"
         return plugin.mc.setTemperatureAsync(@config.deviceNo, @config.mode, temperature)
       )
+
+  class MaxContactSensor extends env.devices.ContactSensor
+
+    constructor: (@config) ->
+      @id = @config.id
+      @name = @config.name
+
+      plugin.mc.on("update", (data) =>
+        env.logger.debug "got update"
+        env.logger.debug data
+        data = data[@config.deviceNo]
+        if data?
+          @_setContact(data.state is 'closed')
+        return
+      )
+      super()
+
 
 
   class MaxModeActionProvider extends env.actions.ActionProvider

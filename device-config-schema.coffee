@@ -49,4 +49,13 @@ module.exports = {
         type: "boolean"
         default: true        
   }
+  MaxContactSensor: {
+    title: "MaxContactSensor config options"
+    type: "object"
+    properties:
+      deviceNo:
+        description: "The Device RF adress"
+        type: "string"
+        default: ""
+  }
 }

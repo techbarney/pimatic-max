@@ -69,6 +69,16 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
       "battery": ""
     }
 
+For contactSensors add this config:
+
+
+    { 
+      "id": "window-bathroom",
+      "class": "MaxContactSensor", 
+      "name": "Bathroom Window",
+      "deviceNo": "12345df"
+    }
+
 Screenshot
 -------------
 [![Screenshot 1][screen1_thumb]](https://cloud.githubusercontent.com/assets/6489464/4346733/d30e7710-4110-11e4-87a7-934770234a84.PNG) 
