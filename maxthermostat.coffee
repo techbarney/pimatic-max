@@ -26,6 +26,10 @@ module.exports = (env) ->
         return
       )
 
+      @mc.on('response', (res) =>
+        env.logger.debug "Response: ", res
+      )
+
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
