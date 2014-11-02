@@ -3,8 +3,8 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
   _ = env.require 'lodash'
-  MaxCube = require 'max-control'
-  Promise.promisifyAll(MaxCube.prototype)
+  MaxCubeConnection = require 'max-control'
+  Promise.promisifyAll(MaxCubeConnection.prototype)
   M = env.matcher
   
   class MaxThermostat extends env.plugins.Plugin
@@ -15,8 +15,7 @@ module.exports = (env) ->
 
       # Promise that is resolved when the connection is established
       @afterConnect = new Promise( (resolve, reject) =>
-        env.logger.debug "Remember to fill config with dummy values to get debug output!"
-        @mc = new MaxCube(plugin.config.host, plugin.config.port)
+        @mc = new MaxCubeConnection(@config.host, @config.port)
         @mc.once("connected", resolve)
         @mc.client.once('error', reject)
         return
@@ -30,6 +29,10 @@ module.exports = (env) ->
         env.logger.debug "Response: ", res
       )
 
+      @mc.on("update", (data) =>
+        env.logger.debug "got update", data
+      )
+
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
@@ -41,6 +44,10 @@ module.exports = (env) ->
         createCallback: (config) -> new MaxContactSensor(config)
       })
 
+      @framework.deviceManager.registerDeviceClass("MaxCube", {
+        configDef: deviceConfigDef.MaxCube,
+        createCallback: (config, lastState) -> new MaxCube(config, lastState)
+      })
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
@@ -91,8 +98,6 @@ module.exports = (env) ->
       @_settemperature = @config.actTemp
 
       plugin.mc.on("update", (data) =>
-        env.logger.debug "got update"
-        env.logger.debug data
         data = data[@config.deviceNo]
         if data?
           @config.actTemp = data.setpoint
@@ -141,8 +146,6 @@ module.exports = (env) ->
       @name = @config.name
 
       plugin.mc.on("update", (data) =>
-        env.logger.debug "got update"
-        env.logger.debug data
         data = data[@config.deviceNo]
         if data?
           @_setContact(data.state is 'closed')
@@ -150,7 +153,34 @@ module.exports = (env) ->
       )
       super()
 
+  class MaxCube extends env.devices.Sensor
 
+    attributes:
+      dutycycle:
+        description: "Percentage of max rf limit reached"
+        type: "number"
+        unit: "%"
+      memoryslots:
+        description: "Available memory slots for commands"
+        type: "number"
+
+    _dutycycle: 0
+    _memoryslots: 50
+
+    constructor: (@config, lastState) ->
+      @id = @config.id
+      @name = @config.name
+      @_dutycycle = lastState?.dutycycle?.value or 0
+      @_memoryslots = lastState?.memoryslots?.value or 0
+
+      plugin.mc.on("status", (info) =>
+        @emit 'dutycycle', info.dutyCycle
+        @emit 'memoryslots', info.memorySlots
+      )
+      super()
+
+    getDutycycle: -> Promise.resolve(@_dutycycle)
+    getMemoryslots: -> Promise.resolve(@_memoryslots)
 
   class MaxModeActionProvider extends env.actions.ActionProvider
 

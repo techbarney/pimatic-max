@@ -58,4 +58,9 @@ module.exports = {
         type: "string"
         default: ""
   }
+  MaxCube: {
+    title: "MaxCube config options"
+    type: "object"
+    properties: {}
+  }
 }
