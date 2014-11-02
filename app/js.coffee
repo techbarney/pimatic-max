@@ -4,12 +4,10 @@ $(document).on( "templateinit", (event) ->
   # define the item class
   class MaxThermostatDeviceItem extends pimatic.DeviceItem
     
-    # The value in the input
-    inputValue: ko.observable()
-
     constructor: (templData, @device) ->
       super(templData, @device)
-      console.log device.config
+      # The value in the input
+      @inputValue = ko.observable()
       # collect input and only send once
       # @delayedInputValue = ko.pureComputed(@inputValue)
       # .extend(rateLimit: 
@@ -45,7 +43,6 @@ $(document).on( "templateinit", (event) ->
       @comfyButton = $(elements).find('[name=comfyButton]')
       @vacButton = $(elements).find('[name=vacButton]')
       @input = $(elements).find('.spinbox input')
-
       @input.spinbox()
 
       @updateButtons()
