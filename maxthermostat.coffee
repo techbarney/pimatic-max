@@ -6,7 +6,8 @@ module.exports = (env) ->
   MaxCubeConnection = require 'max-control'
   Promise.promisifyAll(MaxCubeConnection.prototype)
   M = env.matcher
-  
+  settled = (promise) -> Promise.settle([promise])
+
   class MaxThermostat extends env.plugins.Plugin
  
     init: (app, @framework, @config) =>
@@ -14,7 +15,7 @@ module.exports = (env) ->
       @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
 
       # Promise that is resolved when the connection is established
-      @afterConnect = new Promise( (resolve, reject) =>
+      @_lastAction = new Promise( (resolve, reject) =>
         @mc = new MaxCubeConnection(@config.host, @config.port)
         @mc.once("connected", resolve)
         @mc.client.once('error', reject)
@@ -61,6 +62,12 @@ module.exports = (env) ->
           env.logger.warn(
             "MaxThermostat could not find the mobile-frontend. No gui will be available"
           )
+
+    setTemperature: (deviceNo, mode, value) ->
+      @_lastAction = settled(@_lastAction).then( => 
+        @mc.setTemperatureAsync(deviceNo, mode, value) 
+      )
+      return @_lastAction
 
 
   plugin = new MaxThermostat
@@ -125,19 +132,13 @@ module.exports = (env) ->
       @emit "settemperature", @_settemperature
 
     changeModeTo: (mode) ->
-      return plugin.afterConnect.then( =>
-        # mode: auto, manual, boost
-        plugin.mc.setTemperature @config.deviceNo, mode, @config.actTemp 
+      return plugin.setTemperature(@config.deviceNo, mode, @config.actTemp).then( =>
         @_setMode(mode)
-        return mode
       )
-
+        
     changeTemperatureTo: (temperature) ->
       if @settemperature is temperature then return
-      return plugin.afterConnect.then( =>
-        env.logger.debug "temp is going to change"
-        return plugin.mc.setTemperatureAsync(@config.deviceNo, @config.mode, temperature)
-      )
+      return plugin.setTemperature(@config.deviceNo, @config.mode, temperature)
 
   class MaxContactSensor extends env.devices.ContactSensor
 
@@ -170,8 +171,8 @@ module.exports = (env) ->
     constructor: (@config, lastState) ->
       @id = @config.id
       @name = @config.name
-      @_dutycycle = lastState?.dutycycle?.value or 0
-      @_memoryslots = lastState?.memoryslots?.value or 0
+      @_dutycycle = plugin.mc.dutyCycle
+      @_memoryslots = plugin.mc.memorySlots
 
       plugin.mc.on("status", (info) =>
         @emit 'dutycycle', info.dutyCycle
