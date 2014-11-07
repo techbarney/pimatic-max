@@ -13,6 +13,7 @@ module.exports = (env) ->
     init: (app, @framework, @config) =>
 
       @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
+      @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
 
       # Promise that is resolved when the connection is established
       @_lastAction = new Promise( (resolve, reject) =>
