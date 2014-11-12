@@ -12,14 +12,11 @@ module.exports = (env) ->
  
     init: (app, @framework, @config) =>
 
-      @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
-      @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
-
       # Promise that is resolved when the connection is established
       @_lastAction = new Promise( (resolve, reject) =>
         @mc = new MaxCubeConnection(@config.host, @config.port)
         @mc.once("connected", resolve)
-        @mc.client.once('error', reject)
+        @mc.once('error', reject)
         return
       ).timeout(60000).catch( (error) ->
         env.logger.error "Error on connecting to max cube: #{error.message}"
@@ -33,6 +30,11 @@ module.exports = (env) ->
 
       @mc.on("update", (data) =>
         env.logger.debug "got update", data
+      )
+
+      @mc.on('error', (error) =>
+        env.logger.error "connection error: #{error}"
+        env.logger.debug error.stack
       )
 
       deviceConfigDef = require("./device-config-schema")
@@ -63,6 +65,9 @@ module.exports = (env) ->
           env.logger.warn(
             "MaxThermostat could not find the mobile-frontend. No gui will be available"
           )
+
+      @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
+      @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
 
     setTemperature: (deviceNo, mode, value) ->
       @_lastAction = settled(@_lastAction).then( => 
@@ -133,7 +138,10 @@ module.exports = (env) ->
       @emit "settemperature", @_settemperature
 
     changeModeTo: (mode) ->
-      return plugin.setTemperature(@config.deviceNo, mode, @config.actTemp).then( =>
+      temp = @_settemperature
+      if mode is "auto"
+        temp = null
+      return plugin.setTemperature(@config.deviceNo, mode, temp).then( =>
         @_setMode(mode)
       )
         
@@ -348,10 +356,10 @@ module.exports = (env) ->
     _doExecuteAction: (simulate, value) =>
       return (
         if simulate
-          __("would set temp of %s to %s%%", @device.name, value)
+          __("would set temp of %s to %s°C", @device.name, value)
         else
           @device.changeTemperatureTo(value).then( => 
-            __("set temp of %s to %s%%", @device.name, value) 
+            __("set temp of %s to %s°C", @device.name, value) 
           )
       )
 
