@@ -21,7 +21,6 @@ $(document).on( "templateinit", (event) ->
       attrValue = @stAttr.value()
       @stAttr.value.subscribe( (value) =>
         @inputValue(value)
-        @updatePreTemperature()
         attrValue = value
       )
 
@@ -41,17 +40,15 @@ $(document).on( "templateinit", (event) ->
       @boostButton = $(elements).find('[name=boostButton]')
       @ecoButton = $(elements).find('[name=ecoButton]')
       @comfyButton = $(elements).find('[name=comfyButton]')
-      @vacButton = $(elements).find('[name=vacButton]')
+      # @vacButton = $(elements).find('[name=vacButton]')
       @input = $(elements).find('.spinbox input')
       @input.spinbox()
 
       @updateButtons()
       @updatePreTemperature()
 
-      @getAttribute('mode').value.subscribe( =>
-        @updateButtons()
-      )
-
+      @getAttribute('mode').value.subscribe( => @updateButtons() )
+      @stAttr.value.subscribe( => @updatePreTemperature() )
       return
 
     # define the available actions for the template
