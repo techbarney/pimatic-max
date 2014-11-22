@@ -45,7 +45,7 @@ module.exports = (env) ->
 
       @framework.deviceManager.registerDeviceClass("MaxContactSensor", {
         configDef: deviceConfigDef.MaxContactSensor,
-        createCallback: (config) -> new MaxContactSensor(config, lastState)
+        createCallback: (config, lastState) -> new MaxContactSensor(config, lastState)
       })
 
       @framework.deviceManager.registerDeviceClass("MaxCube", {
@@ -69,9 +69,9 @@ module.exports = (env) ->
       @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
       @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
 
-    temperatureSetpoint: (rfAddress, mode, value) ->
+    setTemperatureSetpoint: (rfAddress, mode, value) ->
       @_lastAction = settled(@_lastAction).then( => 
-        @mc.temperatureSetpointAsync(rfAddress, mode, value) 
+        @mc.setTemperatureAsync(rfAddress, mode, value) 
       )
       return @_lastAction
 
@@ -163,13 +163,13 @@ module.exports = (env) ->
       temp = @_temperatureSetpoint
       if mode is "auto"
         temp = null
-      return plugin.temperatureSetpoint(@config.rfAddress, mode, temp).then( =>
+      return plugin.setTemperatureSetpoint(@config.rfAddress, mode, temp).then( =>
         @_setMode(mode)
       )
         
     changeTemperatureTo: (temperatureSetpoint) ->
       if @temperatureSetpoint is temperatureSetpoint then return
-      return plugin.temperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint)
+      return plugin.setTemperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint)
 
   class MaxContactSensor extends env.devices.ContactSensor
 
