@@ -40,12 +40,12 @@ module.exports = (env) ->
       deviceConfigDef = require("./device-config-schema")
       @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
         configDef: deviceConfigDef.MaxThermostatDevice,
-        createCallback: (config) -> new MaxThermostatDevice(config)
+        createCallback: (config, lastState) -> new MaxThermostatDevice(config, lastState)
       })
 
       @framework.deviceManager.registerDeviceClass("MaxContactSensor", {
         configDef: deviceConfigDef.MaxContactSensor,
-        createCallback: (config) -> new MaxContactSensor(config)
+        createCallback: (config) -> new MaxContactSensor(config, lastState)
       })
 
       @framework.deviceManager.registerDeviceClass("MaxCube", {
@@ -58,9 +58,9 @@ module.exports = (env) ->
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/jqm-spinbox.js"
-          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/js.coffee"
-          mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/css.css"
-          mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/template.html"
+          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/thermostat.coffee"
+          mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/thermostat.css"
+          mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/thermostat.html"
         else
           env.logger.warn(
             "MaxThermostat could not find the mobile-frontend. No gui will be available"
@@ -69,9 +69,9 @@ module.exports = (env) ->
       @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
       @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
 
-    setTemperature: (deviceNo, mode, value) ->
+    temperatureSetpoint: (rfAddress, mode, value) ->
       @_lastAction = settled(@_lastAction).then( => 
-        @mc.setTemperatureAsync(deviceNo, mode, value) 
+        @mc.temperatureSetpointAsync(rfAddress, mode, value) 
       )
       return @_lastAction
 
@@ -81,14 +81,22 @@ module.exports = (env) ->
   class MaxThermostatDevice extends env.devices.Device
 
     attributes:
-      settemperature:
+      temperatureSetpoint:
         description: "the temp that should be set"
         type: "number"
         unit: "°C"
+      valve:
+        description: "position of the valve"
+        type: "number"
+        unit: "%"
       mode:
         description: "the current mode"
         type: "string"
         enum: ["auto", "manu", "boost"]
+      battery:
+        description: "battery status"
+        type: "string"
+        enum: ["ok", "low"]
 
     actions:
       changeModeTo:
@@ -97,66 +105,81 @@ module.exports = (env) ->
             type: "string"
       changeTemperatureTo:
         params: 
-          settemperature: 
+          temperatureSetpoint: 
             type: "number"
 
     template: "MaxThermostatDevice"
 
-    _mode: "auto"
-    _settemperature: null
+    _mode: null
+    _temperatureSetpoint: null
+    _valve: null
+    _battery: null
 
-    constructor: (@config) ->
+    constructor: (@config, lastState) ->
       @id = @config.id
       @name = @config.name
-      @_settemperature = @config.actTemp
+      @_temperatureSetpoint = lastState?.temperatureSetpoint?.value
+      @_mode = lastState?.mode?.value or "auto"
+      @_battery = lastState?.battery?.value or "ok"
 
       plugin.mc.on("update", (data) =>
-        data = data[@config.deviceNo]
+        data = data[@config.rfAddress]
         if data?
-          @config.actTemp = data.setpoint
-          @config.mode = data.mode
-          # @config.comfyTemp = data.comfortTemperature // Doesn't make sense
-          # @config.ecoTemp = data.ecoTemperature // you'll define these in the pimatic config
           @config.battery = data.battery
-          @_setTemp(@config.actTemp)
-          @_setMode(@config.mode)
+          @_setSetpoint(data.setpoint)
+          @_setValve(data.valve)
+          @_setMode(data.mode)
+          @_setBattery(data.battery)
         return
       )
       super()
 
     getMode: () -> Promise.resolve(@_mode)
-    getSettemperature: () -> Promise.resolve(@_settemperature)
+    getTemperatureSetpoint: () -> Promise.resolve(@_temperatureSetpoint)
+    getValve: () -> Promise.resolve(@_valve)
+    getBattery: () -> Promise.resolve(@_battery)
 
     _setMode: (mode) ->
       if mode is @_mode then return
       @_mode = mode
       @emit "mode", @_mode
 
-    _setTemp: (settemperature) ->
-      if settemperature is @_settemperature then return
-      @_settemperature = settemperature
-      @emit "settemperature", @_settemperature
+    _setSetpoint: (temperatureSetpoint) ->
+      if temperatureSetpoint is @_temperatureSetpoint then return
+      @_temperatureSetpoint = temperatureSetpoint
+      @emit "temperatureSetpoint", @_temperatureSetpoint
+
+    _setValve: (valve) ->
+      if valve is @_valve then return
+      @_valve= valve
+      @emit "valve", @_valve
+
+    _setBattery: (battery) ->
+      if battery is @_battery then return
+      @_battery = battery
+      @emit "battery", @_battery
 
     changeModeTo: (mode) ->
-      temp = @_settemperature
+      temp = @_temperatureSetpoint
       if mode is "auto"
         temp = null
-      return plugin.setTemperature(@config.deviceNo, mode, temp).then( =>
+      return plugin.temperatureSetpoint(@config.rfAddress, mode, temp).then( =>
         @_setMode(mode)
       )
         
-    changeTemperatureTo: (temperature) ->
-      if @settemperature is temperature then return
-      return plugin.setTemperature(@config.deviceNo, @config.mode, temperature)
+    changeTemperatureTo: (temperatureSetpoint) ->
+      if @temperatureSetpoint is temperatureSetpoint then return
+      return plugin.temperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint)
 
   class MaxContactSensor extends env.devices.ContactSensor
 
-    constructor: (@config) ->
+    constructor: (@config, lastState) ->
       @id = @config.id
       @name = @config.name
+      @_state = lastState?.state?.value
 
       plugin.mc.on("update", (data) =>
-        data = data[@config.deviceNo]
+        data = data[@config.rfAddress]
         if data?
           @_setContact(data.state is 'closed')
         return

@@ -4,12 +4,8 @@ module.exports = {
     title: "MaxThermostatDevice config options"
     type: "object"
     properties:
-      roomID:
-        description: "The RoomID - find out with read.php"
-        type: "integer"
-        default: 1
-      deviceNo:
-        description: "The Device RF No - find out with read.php"
+      rfAddress:
+        description: "The Device RF address"
         type: "string"
         default: ""
       comfyTemp:
@@ -24,18 +20,6 @@ module.exports = {
         description: "The defined vacation mode temperature"
         type: "number"
         default: 14
-      actTemp: 
-        description: "The actual temperatur"
-        type: "number"
-        default: 21
-      mode: 
-        description: "The mode of the thermostat (auto/manu/boost)"
-        type: "string"
-        default: "auto" 
-      battery: 
-        description: "The battery status"
-        type: "string"
-        default: "ok"
       guiShowModeControl: 
         description: "Show the mode buttons in the gui"
         type: "boolean"
@@ -53,8 +37,8 @@ module.exports = {
     title: "MaxContactSensor config options"
     type: "object"
     properties:
-      deviceNo:
-        description: "The Device RF adress"
+      rfAddress:
+        description: "The Device RF address"
         type: "string"
         default: ""
   }

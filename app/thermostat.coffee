@@ -14,8 +14,8 @@ $(document).on( "templateinit", (event) ->
       #   method: "notifyWhenChangesStop", 
       #   timeout: 500)
 
-      # settemperature changes -> update input + also update buttons if needed
-      @stAttr = @getAttribute('settemperature')
+      # temperatureSetpoint changes -> update input + also update buttons if needed
+      @stAttr = @getAttribute('temperatureSetpoint')
       @inputValue(@stAttr.value())
 
       attrValue = @stAttr.value()
@@ -81,7 +81,6 @@ $(document).on( "templateinit", (event) ->
 
     updatePreTemperature: ->
       if parseFloat(@stAttr.value()) is parseFloat("#{@device.config.ecoTemp}")
-        console.log "eco"
         console.log parseFloat("#{@device.config.ecoTemp}")
         @boostButton.removeClass('ui-btn-active')
         @ecoButton.addClass('ui-btn-active')
@@ -100,9 +99,9 @@ $(document).on( "templateinit", (event) ->
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
 
-    changeTemperatureTo: (settemperature) ->
+    changeTemperatureTo: (temperatureSetpoint) ->
       @input.spinbox('disable')
-      @device.rest.changeTemperatureTo({settemperature}, global: no)
+      @device.rest.changeTemperatureTo({temperatureSetpoint}, global: no)
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
         .always( => @input.spinbox('enable') )
