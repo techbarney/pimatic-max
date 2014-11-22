@@ -45,3 +45,7 @@
   height: 29.75px;
   font-weight: bold;
 }
+
+#index li.maxthermodevice.unsynced{
+  color: gray !important;
+}
