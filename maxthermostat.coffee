@@ -82,6 +82,7 @@ module.exports = (env) ->
 
     attributes:
       temperatureSetpoint:
+        name: "Temperature Setpoint"
         description: "the temp that should be set"
         type: "number"
         unit: "°C"
@@ -121,14 +122,28 @@ module.exports = (env) ->
       @_temperatureSetpoint = lastState?.temperatureSetpoint?.value
       @_mode = lastState?.mode?.value or "auto"
       @_battery = lastState?.battery?.value or "ok"
+      @_lastSendTime = 0
 
       plugin.mc.on("update", (data) =>
         data = data[@config.rfAddress]
         if data?
           @config.battery = data.battery
-          @_setSetpoint(data.setpoint)
+          now = new Date().getTime()
+          ###
+          Give the cube some time to handle the changes. If we send new values to the cube
+          we set _lastSendTime to the current time. We consider the values as succesfull set, when
+          the command was not rejected. But the updates comming from the cube in the next 30
+          seconds do not always reflect the updated values, therefore we ignoring the old values
+          we got by the update message for 30 seconds. 
+
+          In the case that the cube did not react to our the send commands, the values will be 
+          overwritten with the internal state (old ones) of the cube after 30 seconds, because
+          the update event is emitted by max-control periodically.
+          ###
+          if now - @_lastSendTime < 30*1000
+            @_setSetpoint(data.setpoint)
+            @_setMode(data.mode)
           @_setValve(data.valve)
-          @_setMode(data.mode)
           @_setBattery(data.battery)
         return
       )
@@ -164,12 +179,16 @@ module.exports = (env) ->
       if mode is "auto"
         temp = null
       return plugin.setTemperatureSetpoint(@config.rfAddress, mode, temp).then( =>
+        @_lastSendTime = new Date().getTime()
         @_setMode(mode)
       )
         
     changeTemperatureTo: (temperatureSetpoint) ->
       if @temperatureSetpoint is temperatureSetpoint then return
-      return plugin.setTemperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint)
+      return plugin.setTemperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint).then( =>
+        @_lastSendTime = new Date().getTime()
+        @_setSetpoint(temperatureSetpoint)
+      )
 
   class MaxContactSensor extends env.devices.ContactSensor
 
