@@ -29,7 +29,9 @@ $(document).on( "templateinit", (event) ->
         textValue = @inputValue()
         if parseFloat(attrValue) isnt parseFloat(textValue)
           @changeTemperatureTo(parseFloat(textValue))
-      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } });
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
+
+      @synced = @getAttribute('synced').value
 
       # Do something, after create: console.log(this)
     afterRender: (elements) ->

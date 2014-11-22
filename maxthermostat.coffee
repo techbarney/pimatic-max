@@ -98,6 +98,9 @@ module.exports = (env) ->
         description: "battery status"
         type: "string"
         enum: ["ok", "low"]
+      synced:
+        description: "pimatic and max cube in sync"
+        type: "boolean"
 
     actions:
       changeModeTo:
@@ -115,6 +118,7 @@ module.exports = (env) ->
     _temperatureSetpoint: null
     _valve: null
     _battery: null
+    _synced: false
 
     constructor: (@config, lastState) ->
       @id = @config.id
@@ -141,8 +145,14 @@ module.exports = (env) ->
           the update event is emitted by max-control periodically.
           ###
           if now - @_lastSendTime < 30*1000
+            # only if values match, we are synced
+            if data.setpoint is @_temperatureSetpoint and data.mode is @_mode
+              @_setSynced(true)
+          else
+            # more then 30 seconds passed, set the values anyway
             @_setSetpoint(data.setpoint)
             @_setMode(data.mode)
+            @_setSynced(true)
           @_setValve(data.valve)
           @_setBattery(data.battery)
         return
@@ -153,11 +163,17 @@ module.exports = (env) ->
     getTemperatureSetpoint: () -> Promise.resolve(@_temperatureSetpoint)
     getValve: () -> Promise.resolve(@_valve)
     getBattery: () -> Promise.resolve(@_battery)
+    getSynced: () -> Promise.resolve(@_synced)
 
     _setMode: (mode) ->
       if mode is @_mode then return
       @_mode = mode
       @emit "mode", @_mode
+
+    _setSynced: (synced) ->
+      if synced is @_synced then return
+      @_synced = synced
+      @emit "synced", @_synced
 
     _setSetpoint: (temperatureSetpoint) ->
       if temperatureSetpoint is @_temperatureSetpoint then return
@@ -180,6 +196,7 @@ module.exports = (env) ->
         temp = null
       return plugin.setTemperatureSetpoint(@config.rfAddress, mode, temp).then( =>
         @_lastSendTime = new Date().getTime()
+        @_setSynced(false)
         @_setMode(mode)
       )
         
@@ -187,6 +204,7 @@ module.exports = (env) ->
       if @temperatureSetpoint is temperatureSetpoint then return
       return plugin.setTemperatureSetpoint(@config.rfAddress, @_mode, temperatureSetpoint).then( =>
         @_lastSendTime = new Date().getTime()
+        @_setSynced(false)
         @_setSetpoint(temperatureSetpoint)
       )
 
@@ -195,7 +213,7 @@ module.exports = (env) ->
     constructor: (@config, lastState) ->
       @id = @config.id
       @name = @config.name
-      @_state = lastState?.state?.value
+      @_contact = lastState?.contact?.value
 
       plugin.mc.on("update", (data) =>
         data = data[@config.rfAddress]
