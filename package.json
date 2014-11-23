@@ -1,4 +1,5 @@
-{ "name": "pimatic-max",
+{
+  "name": "pimatic-max",
   "description": "Plugin to control the MAX! thermostats via lan cube.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
   "contributors": [
@@ -12,7 +13,7 @@
     "maxthermostat-config-schema.coffee",
     "device-config-schema.coffee"
   ],
-  "version": "0.8.2",
+  "version": "0.8.3",
   "homepage": "http://github.com/pimatic/pimatic-max",
   "repository": {
     "type": "git",
