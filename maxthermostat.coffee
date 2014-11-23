@@ -227,6 +227,7 @@ module.exports = (env) ->
         data = data[@config.rfAddress]
         if data?.actualTemperature?
           @_temperature = data.actualTemperature
+          @_temperature -= data.temperatureOffset if data.temperatureOffset?
           @emit 'temperature', @_temperature
       )
 
