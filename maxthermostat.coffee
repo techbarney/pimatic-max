@@ -63,10 +63,10 @@ module.exports = (env) ->
         # Check if the mobile-frontent was loaded and get a instance
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
-          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/jqm-spinbox.js"
-          mobileFrontend.registerAssetFile 'js', "pimatic-max-thermostat/app/thermostat.coffee"
-          mobileFrontend.registerAssetFile 'css', "pimatic-max-thermostat/app/css/thermostat.css"
-          mobileFrontend.registerAssetFile 'html', "pimatic-max-thermostat/app/thermostat.html"
+          mobileFrontend.registerAssetFile 'js', "pimatic-max/app/jqm-spinbox.js"
+          mobileFrontend.registerAssetFile 'js', "pimatic-max/app/thermostat.coffee"
+          mobileFrontend.registerAssetFile 'css', "pimatic-max/app/css/thermostat.css"
+          mobileFrontend.registerAssetFile 'html', "pimatic-max/app/thermostat.html"
         else
           env.logger.warn(
             "MaxThermostat could not find the mobile-frontend. No gui will be available"
@@ -137,7 +137,6 @@ module.exports = (env) ->
       plugin.mc.on("update", (data) =>
         data = data[@config.rfAddress]
         if data?
-          @config.battery = data.battery
           now = new Date().getTime()
           ###
           Give the cube some time to handle the changes. If we send new values to the cube
