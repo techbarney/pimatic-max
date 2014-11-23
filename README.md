@@ -37,7 +37,7 @@ Use the debug output in pimatic to find out the rfAddress of the devices. Sample
 ````
   
 Thermostats can be defined by adding them to the `devices` section in the config file.
-Set the `class` attribute to `MaxThermostatDevice`. For example:
+Set the `class` attribute to `MaxHeatingThermostat`. For example:
 
 ```json
 { 
