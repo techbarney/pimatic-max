@@ -38,9 +38,9 @@ module.exports = (env) ->
       )
 
       deviceConfigDef = require("./device-config-schema")
-      @framework.deviceManager.registerDeviceClass("MaxThermostatDevice", {
-        configDef: deviceConfigDef.MaxThermostatDevice,
-        createCallback: (config, lastState) -> new MaxThermostatDevice(config, lastState)
+      @framework.deviceManager.registerDeviceClass("MaxHeatingThermostat", {
+        configDef: deviceConfigDef.MaxHeatingThermostat,
+        createCallback: (config, lastState) -> new MaxHeatingThermostat(config, lastState)
       })
 
       @framework.deviceManager.registerDeviceClass("MaxWallThermostat", {
@@ -57,7 +57,7 @@ module.exports = (env) ->
         configDef: deviceConfigDef.MaxCube,
         createCallback: (config, lastState) -> new MaxCube(config, lastState)
       })
-      
+
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
@@ -84,7 +84,7 @@ module.exports = (env) ->
 
   plugin = new MaxThermostat
  
-  class MaxThermostatDevice extends env.devices.Device
+  class MaxHeatingThermostat extends env.devices.Device
 
     attributes:
       temperatureSetpoint:
@@ -221,6 +221,7 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @_temperature = lastState?.temperature?.value
+      super()
       
       plugin.mc.on("update", (data) =>
         data = data[@config.rfAddress]

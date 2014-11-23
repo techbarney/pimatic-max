@@ -42,7 +42,7 @@ Set the `class` attribute to `MaxThermostatDevice`. For example:
 ```json
 { 
   "id": "bathroomLeft",
-  "class": "MaxThermostatDevice", 
+  "class": "MaxHeatingThermostat", 
   "name": "Bathroom Radiator left",
   "rfAddress": "12345cf",
   "comfyTemp": 23.0,

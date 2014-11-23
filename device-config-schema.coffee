@@ -1,7 +1,7 @@
 module.exports = {
   title: "max-thermostat device config schemas"
-  MaxThermostatDevice: {
-    title: "MaxThermostatDevice config options"
+  MaxHeatingThermostat: {
+    title: "MaxHeatingThermostat config options"
     type: "object"
     properties:
       rfAddress:
