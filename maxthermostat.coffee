@@ -43,6 +43,11 @@ module.exports = (env) ->
         createCallback: (config, lastState) -> new MaxThermostatDevice(config, lastState)
       })
 
+      @framework.deviceManager.registerDeviceClass("MaxWallThermostat", {
+        configDef: deviceConfigDef.MaxWallThermostat,
+        createCallback: (config, lastState) -> new MaxWallThermostat(config, lastState)
+      })
+
       @framework.deviceManager.registerDeviceClass("MaxContactSensor", {
         configDef: deviceConfigDef.MaxContactSensor,
         createCallback: (config, lastState) -> new MaxContactSensor(config, lastState)
@@ -52,6 +57,7 @@ module.exports = (env) ->
         configDef: deviceConfigDef.MaxCube,
         createCallback: (config, lastState) -> new MaxCube(config, lastState)
       })
+      
       # wait till all plugins are loaded
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
@@ -207,6 +213,23 @@ module.exports = (env) ->
         @_setSynced(false)
         @_setSetpoint(temperatureSetpoint)
       )
+
+  class MaxWallThermostat extends env.devices.TemperatureSensor
+    _temperature: null
+
+    constructor: (@config, lastState) ->
+      @id = @config.id
+      @name = @config.name
+      @_temperature = lastState?.temperature?.value
+      
+      plugin.mc.on("update", (data) =>
+        data = data[@config.rfAddress]
+        if data?.actualTemperature?
+          @_temperature = data.actualTemperature
+          @emit 'temperature', @_temperature
+      )
+
+    getTemperature: -> Promise.resolve(@_temperature)
 
   class MaxContactSensor extends env.devices.ContactSensor
 

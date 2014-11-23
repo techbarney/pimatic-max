@@ -42,6 +42,15 @@ module.exports = {
         type: "string"
         default: ""
   }
+  MaxWallThermostat: {
+    title: "MaxWallThermostat config options"
+    type: "object"
+    properties:
+      rfAddress:
+        description: "The Device RF address"
+        type: "string"
+        default: ""
+  }
   MaxCube: {
     title: "MaxCube config options"
     type: "object"
