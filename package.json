@@ -8,6 +8,7 @@
   "main": "maxthermostat.coffee",
   "files": [
     "doc",
+    "app",
     "maxthermostat.coffee",
     "README.md",
     "maxthermostat-config-schema.coffee",
