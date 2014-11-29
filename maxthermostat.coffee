@@ -224,7 +224,7 @@ module.exports = (env) ->
       
       plugin.mc.on("update", (data) =>
         data = data[@config.rfAddress]
-        if data?.actualTemperature? and data.actualTemperature isnt 0
+        if data?.actualTemperature?
           @_temperature = data.actualTemperature
           @emit 'temperature', @_temperature
       )
