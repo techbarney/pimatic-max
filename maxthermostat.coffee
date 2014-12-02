@@ -88,7 +88,7 @@ module.exports = (env) ->
 
     attributes:
       temperatureSetpoint:
-        name: "Temperature Setpoint"
+        label: "Temperature Setpoint"
         description: "the temp that should be set"
         type: "number"
         discrete: true
