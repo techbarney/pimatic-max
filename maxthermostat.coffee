@@ -95,6 +95,7 @@ module.exports = (env) ->
       valve:
         description: "position of the valve"
         type: "number"
+        discrete: true
         unit: "%"
       mode:
         description: "the current mode"
