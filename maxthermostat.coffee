@@ -91,6 +91,7 @@ module.exports = (env) ->
         name: "Temperature Setpoint"
         description: "the temp that should be set"
         type: "number"
+        discrete: true
         unit: "°C"
       valve:
         description: "position of the valve"
