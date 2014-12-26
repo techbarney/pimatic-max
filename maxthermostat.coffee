@@ -58,20 +58,6 @@ module.exports = (env) ->
         createCallback: (config, lastState) -> new MaxCube(config, lastState)
       })
 
-      # wait till all plugins are loaded
-      @framework.on "after init", =>
-        # Check if the mobile-frontent was loaded and get a instance
-        mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
-        if mobileFrontend?
-          mobileFrontend.registerAssetFile 'js', "pimatic-max/app/jqm-spinbox.js"
-          mobileFrontend.registerAssetFile 'js', "pimatic-max/app/thermostat.coffee"
-          mobileFrontend.registerAssetFile 'css', "pimatic-max/app/css/thermostat.css"
-          mobileFrontend.registerAssetFile 'html', "pimatic-max/app/thermostat.html"
-        else
-          env.logger.warn(
-            "MaxThermostat could not find the mobile-frontend. No gui will be available"
-          )
-
       @framework.ruleManager.addActionProvider(new MaxModeActionProvider(@framework))
       @framework.ruleManager.addActionProvider(new MaxTempActionProvider(@framework))
 
@@ -84,49 +70,7 @@ module.exports = (env) ->
 
   plugin = new MaxThermostat
  
-  class MaxHeatingThermostat extends env.devices.Device
-
-    attributes:
-      temperatureSetpoint:
-        label: "Temperature Setpoint"
-        description: "the temp that should be set"
-        type: "number"
-        discrete: true
-        unit: "°C"
-      valve:
-        description: "position of the valve"
-        type: "number"
-        discrete: true
-        unit: "%"
-      mode:
-        description: "the current mode"
-        type: "string"
-        enum: ["auto", "manu", "boost"]
-      battery:
-        description: "battery status"
-        type: "string"
-        enum: ["ok", "low"]
-      synced:
-        description: "pimatic and max cube in sync"
-        type: "boolean"
-
-    actions:
-      changeModeTo:
-        params: 
-          mode: 
-            type: "string"
-      changeTemperatureTo:
-        params: 
-          temperatureSetpoint: 
-            type: "number"
-
-    template: "MaxThermostatDevice"
-
-    _mode: null
-    _temperatureSetpoint: null
-    _valve: null
-    _battery: null
-    _synced: false
+  class MaxHeatingThermostat extends env.devices.HeatingThermostat
 
     constructor: (@config, lastState) ->
       @id = @config.id
@@ -165,37 +109,6 @@ module.exports = (env) ->
         return
       )
       super()
-
-    getMode: () -> Promise.resolve(@_mode)
-    getTemperatureSetpoint: () -> Promise.resolve(@_temperatureSetpoint)
-    getValve: () -> Promise.resolve(@_valve)
-    getBattery: () -> Promise.resolve(@_battery)
-    getSynced: () -> Promise.resolve(@_synced)
-
-    _setMode: (mode) ->
-      if mode is @_mode then return
-      @_mode = mode
-      @emit "mode", @_mode
-
-    _setSynced: (synced) ->
-      if synced is @_synced then return
-      @_synced = synced
-      @emit "synced", @_synced
-
-    _setSetpoint: (temperatureSetpoint) ->
-      if temperatureSetpoint is @_temperatureSetpoint then return
-      @_temperatureSetpoint = temperatureSetpoint
-      @emit "temperatureSetpoint", @_temperatureSetpoint
-
-    _setValve: (valve) ->
-      if valve is @_valve then return
-      @_valve= valve
-      @emit "valve", @_valve
-
-    _setBattery: (battery) ->
-      if battery is @_battery then return
-      @_battery = battery
-      @emit "battery", @_battery
 
     changeModeTo: (mode) ->
       temp = @_temperatureSetpoint
