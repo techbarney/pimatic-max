@@ -15,7 +15,11 @@ module.exports = (env) ->
       # Promise that is resolved when the connection is established
       @_lastAction = new Promise( (resolve, reject) =>
         @mc = new MaxCubeConnection(@config.host, @config.port)
-        @mc.once("connected", resolve)
+        @mc.once("connected", =>
+          if @config.debug
+            env.logger.debug "Connected, waiting for first update from cube"
+          @mc.once("update", resolve)
+        )
         @mc.once('error', reject)
         return
       ).timeout(60000).catch( (error) ->
@@ -25,11 +29,13 @@ module.exports = (env) ->
       )
 
       @mc.on('response', (res) =>
-        env.logger.debug "Response: ", res
+        if @config.debug
+          env.logger.debug "Response: ", res
       )
 
       @mc.on("update", (data) =>
-        env.logger.debug "got update", data
+        if @config.debug
+          env.logger.debug "got update", data
       )
 
       @mc.on('error', (error) =>

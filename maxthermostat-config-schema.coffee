@@ -10,4 +10,8 @@ module.exports = {
       description: "The port of the MAX! Cube (Default: 62910)"
       type: "integer"
       default: 62910
+    debug:
+      description: "Output update message from cube and additional infos"
+      type: "boolean"
+      default: true
 }
