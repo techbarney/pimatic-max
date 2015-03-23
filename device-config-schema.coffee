@@ -35,6 +35,7 @@ module.exports = {
   }
   MaxContactSensor: {
     title: "MaxContactSensor config options"
+    extensions: ["xClosedLabel", "xOpenedLabel"]
     type: "object"
     properties:
       rfAddress:
