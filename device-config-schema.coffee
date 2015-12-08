@@ -31,7 +31,11 @@ module.exports = {
       guiShowTemperatureInput:
         description: "Show the temperature input spinbox in the gui"
         type: "boolean"
-        default: true        
+        default: true
+      guiShowValvePosition:
+        description: "Show the valve position in the gui"
+        type: "boolean"
+        default: true
   }
   MaxContactSensor: {
     title: "MaxContactSensor config options"
