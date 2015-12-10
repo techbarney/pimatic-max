@@ -13,7 +13,7 @@
     "maxthermostat-config-schema.coffee",
     "device-config-schema.coffee"
   ],
-  "version": "0.8.13",
+  "version": "0.8.14",
   "homepage": "http://github.com/pimatic/pimatic-max",
   "repository": {
     "type": "git",
